@@ -1,0 +1,427 @@
+Hives:
+  - Name: Payments
+    Lead: Scott Brady
+    Staff: Joshan Mahmud
+    Teams:
+      - Name: Orca
+        Lead: Dexter Cunningham
+        Scrum: ''
+        Product: Uwais Naumaan
+        QA: ''
+        SecurityChampions:
+          - Name: Tom Clark
+            Stage: Trainee
+      - Name: Lemur
+        Lead: Dexter Cunningham
+        Scrum: Paul Hutton
+        Product: Matt Newcombe
+        QA: 'Dmitriy Bielov'
+        SecurityChampions:
+          - Name: Erik Barbosa
+            Stage: Reviewer
+          - Name: Joe Kruger
+            Stage: Reviewer
+          - Name: David Christopher
+            Stage: Reviewer
+          - Name: Ben Archer
+            Stage: Reviewer
+          - Name: Scott Brady
+            Stage: Reviewer
+      - Name: Badger
+        Lead: Mani Rana
+        Scrum: ''
+        Product: Tom Phillips
+        QA: ''   
+        SecurityChampions:
+          - Name: Joseph Phillips
+            Stage: Reviewer
+          - Name: Zakeria Hirsi
+            Stage: Reviewer
+      - Name: Skeletorus
+        Lead: Abdul Baruwa
+        Scrum: Paul Hutton
+        Product: ''
+        QA: ''
+        SecurityChampions:
+          - Name: Aiden Gleave
+            Stage: Reviewer
+          - Name: Matthew Kirtley
+            Stage: Reviewer
+      - Name: Bee
+        Lead: Abdul Baruwa
+        Scrum: Paul Hutton
+        Product: ''
+        QA: ''
+        SecurityChampions:
+          - Name: Sam Whale
+            Stage: Reviewer
+          - Name: Lewis Martins
+            Stage: Reviewer
+          - Name: Luke Scannell
+            Stage: Reviewer
+          - Name: Slobodan Vulic
+            Stage: Reviewer
+          - Name: Sean Adamson
+            Stage: Reviewer
+  - Name: CorrespondantBanking-FX-DigitalAssetts
+    Lead: Terry McNicholls
+    Staff: Placeholder
+    Teams:
+      - Name: Werewolves
+        Lead: Akhil Verma
+        Scrum: Funmi Bello
+        Product: Ben Altieri
+        QA: ''
+        SecurityChampions:
+          - Name: Simon Ness
+            Stage: Reviewer
+          - Name: Abubakr Olorunlambe
+            Stage: Reviewer
+      - Name: Narwhal
+        Lead: Akhil Verma
+        Scrum: Funmi Bello
+        Product: Bertrand Liger and Rachel Hitchman and Uwais Naumaan
+        QA: ''
+        SecurityChampions:
+          - Name: Andrew Poole
+            Stage: Reviewer  
+      - Name: Lion
+        Lead: Pedro Rodrigues
+        Scrum: Funmi Bello
+        Product: Michael Kidd
+        QA: ''
+        SecurityChampions:
+          - Name: Alastair Gilles
+            Stage: Reviewer
+          - Name: Connor Harris
+            Stage: Reviewer
+          - Name: Robert Dolman
+            Stage: Reviewer
+          - Name: Pedro Rodrigues
+            Stage: Reviewer
+          - Name: Ross Scott
+            Stage: Reviewer
+          - Name: Izabela Slawek
+            Stage: Reviewer
+          - Name: Michael von Etzdorf
+            Stage: Reviewer
+      - Name: Tamagotchi
+        Lead: Pedro Rodrigues
+        Scrum: ''
+        Product: ''
+        QA: ''
+  - Name: Account Products
+    Lead: Jonny Gibson
+    Staff: Mike Gore
+    Teams:
+      - Name: Toucan
+        Lead: Tom Cook
+        Scrum: Aileen Gana
+        Product: Yejide Akomolafe
+        QA: Usha Manjunath
+        SecurityChampions:
+          - Name: Lois Martins
+            Stage: Reviewer
+          - Name: Ben Stuart
+            Stage: Reviewer
+      - Name: Hornbill
+        Lead: Gavin Draper
+        Scrum: Aileen Gana
+        Product: Ben Garfitt
+        QA: Usha Manjunath
+        SecurityChampions:
+          - Name: Mark Gebbet
+            Stage: Reviewer
+  - Name: Fincrime and Client Servicing
+    Lead: Doug Thomson
+    Staff: Placeholder
+    Teams:
+      - Name: Wolverine
+        Lead: Martin Smith
+        Scrum: Funmi Bello
+        Product: Ben Altieri
+        QA: ''
+        SecurityChampions:
+          - Name: Milorad Ranitovic
+            Stage: Reviewer
+      - Name: Alligator
+        Lead: Kola Oyedeji
+        Scrum: Jelena Desic
+        Product: Jonathan Turner
+        QA: ''
+        SecurityChampions:
+          - Name: Martin Smith
+            Stage: Reviewer
+          - Name: Sam Eley
+            Stage: Reviewer
+      - Name: Anaconda
+        Lead: Garry Pope
+        Scrum: Jelena Desic
+        Product: Ben Altieri
+        QA: ''
+        SecurityChampions:
+          - Name: Garry Pope
+            Stage: Reviewer
+      - Name: Owl
+        Lead: Garry Pope
+        Scrum: Jelena Desic
+        Product: Ben Altieri
+        QA: ''
+        SecurityChampions:
+          - Name: Garry Pope
+            Stage: Reviewer
+      - Name: Fox
+        Lead: Dewald Fortier
+        Scrum: Vasso Loizou
+        Product: Daniel Osbourn
+        SecurityChampions:
+          - Name: Alexander Keohane
+            Stage: Reviewer
+          - Name: William Chibvongodze
+            Stage: Reviewer
+          - Name: Mark Gent
+            Stage: Reviewer
+          - Name: Andrew Hutchinson
+            Stage: Reviewer
+      - Name: Jackal
+        Lead: Mark White
+        Scrum: Vasso Loizou
+        Product: David Parsons
+        SecurityChampions:
+          - Name: Peter Lea
+            Stage: Reviewer
+          - Name: Michael Marron
+            Stage: Reviewer
+          - Name: Richard Gate
+            Stage: Reviewer
+  - Name: Corporate Foundations
+    Lead: Andy Olliver
+    Staff: Placeholder
+    Teams:
+      - Name: Odin
+        Lead: Dean Robinson
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Thor
+        Lead: Sarahjayne Brazier
+        Scrum: Rupert Laslett
+        Product: ''
+        QA: ''
+        SecurityChampions:
+          - Name: Sarahjayne Brazier
+            Stage: Reviewer
+      - Name: Loki
+        Lead: Tim Barton
+        Scrum: Vivek Adalkha
+        Product: ''
+        QA: ''
+      - Name: Freya
+        Lead: Tim Barton
+        Scrum: Placeholder
+        Product: Placeholder
+        QA: Placeholder
+  - Name: Accounts Foundation
+    Lead: Dave Marsland
+    Staff: Mike Gore
+    Teams:
+      - Name: Bongo
+        Lead: Ivan Alekseev
+        Scrum: Placeholder
+        Product: Yejide Akomolafe
+        QA: Placeholder
+        SecurityChampions:
+          - Name: Dan Oak
+            Stage: Reviewer
+          - Name: Harry Robertson
+            Stage: Reviewer
+          - Name: Terry Mills
+            Stage: Reviewer
+      - Name: Tuna
+        Lead: Ivan Alekseev
+        Scrum: Placeholder
+        Product: Placeholder
+        QA: Placeholder
+        SecurityChampions:
+          - Name: Placeholder
+            Stage: Reviewer
+      - Name: Falcon
+        Lead: Rigardt Pheiffer
+        Scrum: Open Role
+        Product: Phillip Watkinson
+        QA: Open Role
+        SecurityChampions:
+          - Name: Nicholas Hall
+            Stage: Reviewer
+          - Name: Anique Ahmad
+            Stage: Trainee
+          - Name: Joseph Fortey
+            Stage: Reviewer
+      - Name: Sparrow
+        Lead: Charlie Townsend
+        Scrum: Open Role
+        Product: William Turner
+        QA: Open Role
+        SecurityChampions:
+          - Name: Lilia Plesca
+            Stage: Reviewer
+          - Name: Anjelica Alioscenco
+            Stage: Reviewer
+          - Name: Dorin Baba
+            Stage: Reviewer
+      - Name: Squid
+        Lead: Charlie Townsend
+        Scrum: Open Role
+        Product: Vineet Luthra
+        QA: Open Role
+        SecurityChampions:
+          - Name: Alexandr Ivanov
+            Stage: Reviewer
+  - Name: Infrastructure
+    Lead: Tom Harris
+    Staff: Cara Ryan
+    Teams:
+      - Name: Cheetah
+        Lead: Carl Molyneux
+        Scrum: Simon Wraight
+        Product: Sam Harvey
+        QA: ''
+      - Name: Leopard
+        Lead: Carl Molyneux
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Tiger
+        Lead: Jamie Peacock
+        Scrum: Simon Wraight
+        Product: Sam Harvey
+        QA: ''
+        SecurityChampions:
+          - Name: Luke Parry
+            Stage: Reviewer
+          - Name: Mohamed Mohamud
+            Stage: Reviewer
+      - Name: Ocelots
+        Lead: Patrick O'Donnell
+        Scrum: Funmi Bello
+        Product: Alla Babkina
+        QA: ''
+      - Name: Serval
+        Lead: David Marlins
+        Scrum: Funmi Bello
+        Product: Alla Babkina
+        QA: ''
+        SecurityChampions:
+          - Name: Anthony McLaughlin
+            Stage: Reviewer
+      - Name: Sphynx
+        Lead: David Marlins
+        Scrum: Funmi Bello
+        Product: Alla Babkina
+        QA: ''
+      - Name: Manul
+        Lead: David Marlins
+        Scrum: ''
+        Product: ''
+        QA: ''
+  - Name: CTO
+    Lead: Tom Harris
+    Staff: Placeholder
+    Teams:
+      - Name: Hyena
+        Lead: Steven Hawkins
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Principals
+        Lead: Michael Gray
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Staffs
+        Lead: Placeholder
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Engineering-Managers
+        Lead: Placeholder
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Directors
+        Lead: Placeholder
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Ex-Machina
+        Lead: Placeholder
+        Scrum: ''
+        Product: ''
+        QA: ''            
+  - Name: Data
+    Lead: Luke Wheeler
+    Staff: Placeholder
+    Teams:
+      - Name: Panther
+        Lead: Polycarp Apraku
+        Scrum: ''
+        Product: Luke Wheeler
+        QA: ''
+      - Name: Corgi
+        Lead: Matt Roberts
+        Scrum: ''
+        Product: ''
+        QA: ''
+  - Name: Security Engineering
+    Lead: Huw Jeffries
+    Staff: Placeholder
+    Teams:
+      - Name: Scorpions
+        Lead: Tom Robinson
+        Scrum: ''
+        Product: Bernard Wright
+        QA: ''
+        SecurityChampions:
+          - Name: Aleks Rudenoks
+            Stage: Reviewer
+          - Name: Chester Burbidge
+            Stage: Reviewer
+          - Name: Tom Robinson
+            Stage: Reviewer
+          - Name: Michael Herzberg
+            Stage: Reviewer
+      - Name: Vipers
+        Lead: Tom Ling
+        Scrum: ''
+        Product: Bernard Wright
+        QA: ''
+        SecurityChampions:
+          - Name: Matt Potts
+            Stage: Reviewer
+          - Name: Tom Ling
+            Stage: Reviewer
+          - Name: Neil Reed
+            Stage: Reviewer
+  - Name: Security Operations
+    Lead: Thomas Knowles
+    Staff: Placeholder
+    Teams:
+      - Name: Velociraptor
+        Lead: Thomas Knowles
+        Scrum: ''
+        Product: Thomas Knowles
+        QA: ''
+  - Name: ToBeRemoved
+    Lead: Placeholder
+    Staff: Placeholder
+    Teams:
+      - Name: Capybara
+        Lead: Dexter Cunningham
+        Scrum: ''
+        Product: ''
+        QA: ''
+      - Name: Goose
+        Lead: Dexter Cunningham
+        Scrum: ''
+        Product: ''
+        QA: ''

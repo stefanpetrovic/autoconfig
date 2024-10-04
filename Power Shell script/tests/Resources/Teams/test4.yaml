@@ -1,0 +1,32 @@
+TeamName: velociraptor
+AzureDevopsAreaPath: cbi\Team Velociraptor
+TeamWikiLocation: https://dev.azure.com/cbinfrastructure/InfoSec/_wiki/wikis/InfoSec.wiki/7419/Security-Operations
+TeamMembers:
+- Name: Thomas Knowles
+  EmailAddress: thomas.knowles@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Luke Jowett
+  EmailAddress: luke.jowett@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Ravi Mann
+  EmailAddress: ravi.mann@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Nathan Millwater
+  EmailAddress: nathan.millwater@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Sam Tribe
+  EmailAddress: sam.tribe@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Rowan Stables
+  EmailAddress: rowan.stables@clear.bank
+  EmployeeType: Employee 
+  Level: 
+- Name: Luke Nicholls
+  EmailAddress: luke.nicholls@clear.bank
+  EmployeeType: Employee 
+  Level: 

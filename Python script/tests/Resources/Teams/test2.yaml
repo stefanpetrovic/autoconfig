@@ -1,0 +1,32 @@
+TeamName: tiger
+AzureDevopsAreaPath: cbi\Team Tiger
+TeamWikiLocation: 
+TeamMembers:
+- Name: Jamie Peacock
+  EmailAddress: jamie.peacock@clear.bank
+  EmployeeType: Employee
+  Level: M4 Team Lead
+- Name: Julia Thomas
+  EmailAddress: julia.thomas@clear.bank
+  EmployeeType: Employee
+  Level: L2 Engineer
+- Name: Luke Parry
+  EmailAddress: luke.parry@clear.bank
+  EmployeeType: Employee
+  Level: L5 Senior Engineer
+- Name: Matthew Jones
+  EmailAddress: matthew.jones@clear.bank
+  EmployeeType: Employee
+  Level: L3 Engineer
+- Name: Mohamed Mohamud
+  EmailAddress: mohamed.mohamud@clear.bank
+  EmployeeType: Employee
+  Level: L1 Associate Engineer
+- Name: Sam Harvey
+  EmailAddress: sam.harvey@clear.bank
+  EmployeeType: Employee
+  Level: ''
+- Name: Stephen Salt
+  EmailAddress: stephen.salt@clear.bank
+  EmployeeType: Employee
+  Level: L5 Senior Engineer
