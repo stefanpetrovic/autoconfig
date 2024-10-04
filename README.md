@@ -56,11 +56,17 @@ When you run Run.ps1 locally it will prompt you for the
 
 The Phoenix base endpoint for API requests is: [https://api.YOURDOMAIN.securityphoenix.cloud](https://api.YOURDOMAIN.securityphoenix.cloud)
 
+Note: change YOURDOMAIN : https://YOURDOMAIN.securityphoenix.cloud/ with the specific code name given for your domain
+
+
 ## Obtaining Access token
 
 Using the Phoenix API Credentials you must obtain an Access token that is only valid for a limited amount of time to invoke the Phoenix API's.
 
 This is done via making a HTTP GET call to [v1/auth/access_token](https://YOURDOMAIN.securityphoenix.cloud/v1/auth/access_token).
+
+Note: change YOURDOMAIN : https://YOURDOMAIN.securityphoenix.cloud/ with the specific code name given for your domain
+
 
 See function `GetAuthToken`.
 
@@ -86,7 +92,7 @@ A member of your org maybe responsible for one or more team teams. This is curre
 
 ## Teams
 
-Teams are created by the entries within the team data structure
+The entries within the team data structure create teams
 
 The teams have component association rules based on the tag pteam `pteam` tag to the API request to Phoenix.
 
@@ -98,6 +104,9 @@ The function [CreateTeams] Phoenix.ps1
 
 Staff need to first login to the [Phoenix portal](https://YOURDOMAIN.securityphoenix.cloud/) using SSO before they can be assigned to a team.
 
+Note: change YOURDOMAIN : https://YOURDOMAIN.securityphoenix.cloud/ with the specific code name given for your domain
+
+
 The assignment should be run once a day (at least) [Phoenix Cron job]
 
 The [Teams Yaml] Teams files are used as a source of truth of who belongs to which team.
@@ -108,7 +117,7 @@ The function [AssignUsersToTeam] Phoenix.ps1
 
 The [Hives Yaml] hives.yaml contains a list of leaders who are responsible for 1 or more teams.
 
-The function [AssignUsersToTeam] Phoenix.ps1
+The function [AssignUsersToTeam] (Power Shell script/providers/Phoenix.ps1)
 
 ## Coud subscriptions
 in the main run.ps1 the subscriptions are assigned a criticality level and grouped from production to development, use the Azure or AWS subscription ID in these specification
@@ -137,13 +146,19 @@ A rule is created to use the Azure `pipeline` tag to associate it back to the `c
 
 This allows the resource allocation to remain up-to-date if the owner of the resource changes.
 
-THe function is called [AddEnvironmentServices](Phoenix.ps1).
+
+The function for AddEnvironmentServices creation in Powershell - [AddEnvironmentServices](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Power%20Shell%20script/providers/Phoenix.ps1)
+The function for AddEnvironmentServices creation in Python - [AddEnvironmentServices](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Python%20script/providers/Phoenix.py)
+
 
 ## Applications
 
 Applications are groupings of code that provide functionality for a service. As per environment services the `subdomain` in `core-structure.yaml`.
 
 The function is called [CreateApplications](Phoenix.ps1)
+
+The function for CreateApplications creation in Powershell - [CreateApplications](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Power%20Shell%20script/providers/Phoenix.ps1)
+The function for CreateApplications creation in Python - [CreateApplication](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Python%20script/providers/Phoenix.py)
 
 ## Components
 
@@ -158,7 +173,9 @@ Team allocation is performed by added a `pteam` tag to the API request to Phoeni
 
 Example `pteam:axelot`.
 
-The function for Component creation is [CreateRepositories](Phoenix.ps1).
+The function for Component creation in Powershell - [CreateRepositories](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Power%20Shell%20script/providers/Phoenix.ps1)
+The function for Component creation in Python - [CreateRepositories](https://github.com/Security-Phoenix-demo/autoconfig/blob/main/Python%20script/providers/Phoenix.py)
+
 
 ## Deployed Applications
 
