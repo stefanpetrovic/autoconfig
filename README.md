@@ -1,5 +1,7 @@
-# autoconfig
+# Phoenix Security Script for automatic configuration and asset management - Phoenix Autoconfig
 Configuration script and asset inventory - team inventory to drive the automatic configuration of Phoenix 
+
+# Phoenix Security Autoconfig script Disclaimers 
 
 Note: the version of the scripts is as is, there is no guarantee of function, the version shared here is part of the Phoenix Security community [PHOENIX SECURITY Community - Cyber risk defender club](https://phoenix.security/cyber-risk-club-resources/) and Phoenix Security team does contribute to it but this script does not form part of the phoenix security core offering 
 please verify and test the script and use at your own risk,
