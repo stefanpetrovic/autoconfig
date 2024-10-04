@@ -1,72 +1,200 @@
-import json
-import requests
+import time
+import csv
+import os
+from providers.Phoenix import get_phoenix_components, create_teams, create_team_rules, assign_users_to_team
+from providers.Utils import populate_repositories, populate_domains, populate_teams, populate_hives, populate_subdomain_owners, get_subdomains, get_auth_token
+from providers.YamlHelper import load_yaml, write_yaml
+from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
-def construct_api_url(component_id):
-    """
-    Construct the API URL for accessing component tags.
-    """
-    base_url = "https://your-api-url.com/v1/components/"
-    return f"{base_url}{component_id}/tags"
+# Global Variables
+resource_folder = os.path.join(os.path.dirname(__file__), 'Resources')
+client_id = ""
+client_secret = ""
+access_token = ""
+action_teams = True
+action_code = True
+action_cloud = True
 
-def remove_tag(component, tag, headers):
-    """
-    Removes the tag from the given component using a PATCH request.
-    """
+# Handle command-line arguments or prompt for input
+import sys
+args = sys.argv[1:]
+
+print("Arguments supplied:", len(args))
+
+if len(args) == 5:
+    client_id = args[0]
+    client_secret = args[1]
+
+    if args[2].lower() == "false":
+        action_teams = False
+
+    if args[3].lower() == "false":
+        action_code = False
+
+    if args[4].lower() == "false":
+        action_cloud = False
+
+    print(f"Teams: {action_teams}, Code: {action_code}, Cloud: {action_cloud}")
+else:
+    client_id = input("Please enter clientID: ")
+    client_secret = input("Please enter clientSecret: ")
+
+environments = []
+
+# Populate data from various resources
+repos = populate_repositories(resource_folder)
+domains = populate_domains(repos)
+teams = populate_teams(resource_folder)
+hive_staff = populate_hives(resource_folder)
+subdomain_owners = populate_subdomain_owners(repos)
+subdomains = get_subdomains(repos)
+
+# Display teams
+print("[Teams]")
+for team in teams:
     try:
-        # Prepare payload for the API request
-        payload = {
-            "action": "delete",
-            "tags": [
-                {
-                    "id": tag["id"],
-                    "key": tag["key"],
-                    "value": tag["value"]
-                }
-            ]
-        }
-
-        # Convert payload to JSON
-        payload_json = json.dumps(payload, indent=2)
-
-        print(f"- Removing tag {tag['key']} {tag['value']}")
-
-        # Construct API URL
-        api_url = construct_api_url(component["id"])
-
-        # Make the PATCH request
-        response = requests.patch(api_url, headers=headers, data=payload_json)
-
-        # Check for response status code
-        if response.status_code == 200:
-            print(f"Tag {tag['key']} {tag['value']} removed successfully.")
-        else:
-            print(f"Failed to remove tag: {response.status_code}")
-            print(response.text)
-
+        if "Team" in team['AzureDevopsAreaPath']:
+            team['TeamName'] = team['AzureDevopsAreaPath'].split("Team")[1].strip()
+            print(team['TeamName'])
     except Exception as e:
-        print(f"Error removing tag for component: {component['name']}")
-        print(f"Exception: {str(e)}")
+        print(f"Error: {e}")
 
+# Display domains and repos
+print("\n[Domains]")
+print(domains)
 
-# Example of calling the remove_tag function
-if __name__ == "__main__":
-    # Sample component and tag data
-    component = {
-        "id": "component123",
-        "name": "Sample Component"
-    }
+print("\n[Repos]")
+print(repos)
 
-    tag = {
-        "id": "tag123",
-        "key": "environment",
-        "value": "production"
-    }
+# Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
+environments.append({
+    'Name': 'Production',
+    'Criticality': 10,
+    'CloudAccounts': ["", ""]
+})
 
-    # Example headers (authentication, content type, etc.)
-    headers = {
-        "Authorization": "Bearer YOUR_ACCESS_TOKEN",
-        "Content-Type": "application/json"
-    }
+environments.append({
+    'Name': 'Development',
+    'Criticality': 5,
+    'CloudAccounts': []
+})
 
-    # Remove the tag
-    remove_tag(component, tag, headers)
+environments.append({
+    'Name': 'DevOPS',
+    'Criticality': 5,
+    'CloudAccounts': [""]
+})
+
+environments.append({
+    'Name': 'Thirdparty',
+    'Criticality': 5,
+    'CloudAccounts': [""]
+})
+
+environments.append({
+    'Name': 'SIM',
+    'Criticality': 8,
+    'CloudAccounts': []
+})
+
+environments.append({
+    'Name': 'Staging',
+    'Criticality': 7,
+    'CloudAccounts': []
+})
+
+# Get authentication token
+access_token = get_auth_token(client_id, client_secret)
+
+headers = {
+    "Authorization": f"Bearer {access_token}",
+    "Content-Type": "application/json"
+}
+
+phoenix_components = get_phoenix_components()
+app_environments = []  # Should be populated using the equivalent PopulateApplicationsAndEnvironments
+
+# Stopwatch logic
+start_time = time.time()
+
+# Team actions
+if action_teams:
+    print("Performing Teams Actions")
+    all_team_access = []  # PopulateUsersWithAllTeamAccess logic goes here
+    create_teams()
+    create_team_rules()
+    assign_users_to_team()
+
+    elapsed_time = time.time() - start_time
+    print(f"[Diagnostic] [Teams] Time Taken: {elapsed_time}")
+    start_time = time.time()
+
+# Cloud actions
+if action_cloud:
+    print("Performing Cloud Actions")
+    for environment in environments:
+        if not any(env['Name'] == environment['Name'] and env.get('type') == "ENVIRONMENT" for env in app_environments):
+            # Create environments as needed
+            print(f"Creating environment: {environment['Name']}")
+
+    # Perform cloud services
+    print("[Diagnostic] [Cloud] Time Taken:", time.time() - start_time)
+    print("Starting Cloud Asset Rules")
+    print("[Diagnostic] [Cloud] Time Taken:", time.time() - start_time)
+    print("Starting Third Party Rules")
+    
+    elapsed_time = time.time() - start_time
+    print(f"[Diagnostic] [Cloud] Time Taken: {elapsed_time}")
+    start_time = time.time()
+
+# Code actions
+if action_code:
+    cluster_images = []
+
+    file = "AKSImages.csv"
+    subscriptions = get_subscriptions()
+
+    for subscription in subscriptions:
+        print(subscription['Name'])
+        clusters = get_clusters(subscription)
+        for cluster in clusters:
+            cluster_images.extend(get_cluster_images(cluster))
+
+        print(f"Total Images Tally: {len(cluster_images)}")
+
+        if cluster_images:
+            with open(file, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(cluster_images)
+
+        time.sleep(5)
+
+    if os.path.exists(file):
+        print(f"Processing {file}")
+        with open(file, 'r') as csvfile:
+            csv_data = csv.DictReader(csvfile)
+
+            service_lookup = {"workload-identity-webhook": "Compute"}
+
+            for row in csv_data:
+                found = False
+                if row['Repo']:
+                    print(f"Row: {row['Repo']}")
+                    if row['Repo'] in service_lookup:
+                        environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
+                        if environment:
+                            print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
+                            found = True
+
+                    if not found:
+                        repo = next((r for r in repos if r['RepositoryName'] == row['Repo']), None)
+                        if repo:
+                            print(f"Match found. Subdomain: {repo['Subdomain']}")
+                            environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
+                            if environment:
+                                print(f"Environment found: {environment['Name']}")
+                                print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
+
+    # Perform code actions
+    print("Performing Code Actions")
+    print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
