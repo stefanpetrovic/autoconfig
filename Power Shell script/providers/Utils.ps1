@@ -126,8 +126,8 @@ function PopulateUsersWithAllTeamAccess {
         }
 
     }
-
-    $allaccess += "bernard.wright@clear.bank"
+#this gives super user access to the ciso or who else wants access
+    $allaccess += "ciso@company.com"
 
     return $allaccess
 }
@@ -138,7 +138,7 @@ function DoesMemberExist
 
     $found = $false;
 
-    $overrideList = @("russell.miles@clear.bank", "neil.syrett@clear.bank")
+    $overrideList = @("teamlead@ompany.com", "teamlead2@ompany.com")
 
     if($overrideList.Contains($email))
     {

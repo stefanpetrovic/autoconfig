@@ -68,8 +68,6 @@ function PopulateSubdomainOwners
         
     }
 
-    $subdomains.Add("Databricks", @("panther"))
-
     return $subdomains
     
 }
@@ -163,14 +161,14 @@ function PopulateHives
                 $products = @()
                 if (![string]::IsNullOrEmpty($team.Product)) 
                 {
-                    # Split the Product field if it contains 'and'
+                    # Split the Product field if it contains 'and'  @company.com
                     $products = ($team.Product -split ' and ') | ForEach-Object {
-                        $_.ToLower().Replace(" ", ".") + "@clear.bank"
+                        $_.ToLower().Replace(" ", ".") + "@company.com"
                     }
                 }
-                        # Create a PSCustomObject and add it to the $Hives array
+                        # Create a PSCustomObject and add it to the $Hives array, please change @company.com
                         $hiveObject = [PSCustomObject]@{
-                            'Lead'   = $team.Lead.ToLower().Replace(" ", ".") + "@clear.bank"
+                            'Lead'   = $team.Lead.ToLower().Replace(" ", ".") + "@company.com"
                             'Product' = $products
                             'Team'   = $team.Name
                         }

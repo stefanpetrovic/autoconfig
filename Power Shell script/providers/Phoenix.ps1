@@ -43,7 +43,7 @@ function CreateEnvironments {
             "subType"     = $envType
             "criticality" = $criticality
             "owner"       = @{
-                "email" = "neil.reed@clear.bank"
+                "email" = "admin@company.com"
             }
         }
 
@@ -452,14 +452,6 @@ function CreateApplication {
 
     param($name, $domain)
 
-    if ($name -eq "FX") {
-        $name = "Foreign Exchange(FX)"
-    }
-
-    if ($domain -eq "FX") {
-        $domain = "Foreign Exchange(FX)"
-    }
-
     try {
         $payload = @{
             "name"        = $name
@@ -472,7 +464,7 @@ function CreateApplication {
                 }
             )
             "owner"       = @{
-                "email" = "neil.reed@clear.bank"
+                "email" = "admin@company.com"
             }
         }
 
@@ -589,21 +581,15 @@ function CreateRepositories {
     }
 }
 
+# Create the payload, the function assume 1 repo per component with the component name being the repository this can be edited
+
 function CreateRepo {
     param ($repo)
 
     try {
-        if ($repo.Domain -eq "FX") {
-            $repo.Domain = "Foreign Exchange(FX)"
-        }
-
-        if ($repo.Subdomain -eq "FX") {
-            $repo.Subdomain = "Foreign Exchange(FX)"
-        }
-        
         $criticality = CalculateCriticality $repo.Tier
         $payload = @{
-            "repository"          = "cbi/$($repo.RepositoryName)"
+            "repository"          = "$($repo.RepositoryName)"
             "applicationSelector" = @{
                 "name"          = $repo.Subdomain
                 "caseSensitive" = $false
@@ -648,11 +634,8 @@ function AddCloudAssetRules
 {
 
     foreach ($repo in $repos) {
-        if ($repo.Domain -eq "FX") {
-            $repo.Domain = "Foreign Exchange(FX)"
-        }
 
-        $searchTerm = "*cbi/" + $repo.RepositoryName + "(*"
+        $searchTerm = "*" + $repo.RepositoryName + "(*"
         CloudAssetRule $repo.subdomain $searchTerm "Production"
     }
 
