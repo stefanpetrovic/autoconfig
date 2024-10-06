@@ -1,7 +1,7 @@
 ## Versioning
 
-V 2.1.0
-Date - 02 October 2024
+V 2.1.2
+Date - 06 October 2024
 
 # Introduction
 
