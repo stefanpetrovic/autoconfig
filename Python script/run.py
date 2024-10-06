@@ -1,9 +1,9 @@
 import time
 import csv
 import os
-from providers.Phoenix import get_phoenix_components, create_teams, create_team_rules, assign_users_to_team
-from providers.Utils import populate_repositories, populate_domains, populate_teams, populate_hives, populate_subdomain_owners, get_subdomains, get_auth_token
-from providers.YamlHelper import load_yaml, write_yaml
+from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team
+from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
+from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners
 from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
 # Global Variables
@@ -45,9 +45,13 @@ environments = []
 repos = populate_repositories(resource_folder)
 domains = populate_domains(repos)
 teams = populate_teams(resource_folder)
-hive_staff = populate_hives(resource_folder)
+hive_staff = populate_hives(resource_folder)  # List of Hive team staff
 subdomain_owners = populate_subdomain_owners(repos)
 subdomains = get_subdomains(repos)
+
+pteams = populate_phoenix_teams(access_token)  # Pre-existing Phoenix teams
+all_team_access = []  # Populate users with full team access (this needs to be implemented)
+
 
 # Display teams
 print("[Teams]")
@@ -69,25 +73,25 @@ print(repos)
 # Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
 environments.append({
     'Name': 'Production',
-    'Criticality': 10,
+    'Criticality': 1,
     'CloudAccounts': ["", ""]
 })
 
 environments.append({
     'Name': 'Development',
-    'Criticality': 5,
+    'Criticality': 6,
     'CloudAccounts': []
 })
 
 environments.append({
     'Name': 'DevOPS',
-    'Criticality': 5,
+    'Criticality': 7,
     'CloudAccounts': [""]
 })
 
 environments.append({
     'Name': 'Thirdparty',
-    'Criticality': 5,
+    'Criticality': 4,
     'CloudAccounts': [""]
 })
 
@@ -99,7 +103,7 @@ environments.append({
 
 environments.append({
     'Name': 'Staging',
-    'Criticality': 7,
+    'Criticality': 9,
     'CloudAccounts': []
 })
 
@@ -111,7 +115,9 @@ headers = {
     "Content-Type": "application/json"
 }
 
-phoenix_components = get_phoenix_components()
+phoenix_components = get_phoenix_components(access_token)
+pteams = populate_phoenix_teams(access_token)
+
 app_environments = []  # Should be populated using the equivalent PopulateApplicationsAndEnvironments
 
 # Stopwatch logic
@@ -120,10 +126,10 @@ start_time = time.time()
 # Team actions
 if action_teams:
     print("Performing Teams Actions")
-    all_team_access = []  # PopulateUsersWithAllTeamAccess logic goes here
-    create_teams()
-    create_team_rules()
-    assign_users_to_team()
+    all_team_access = populate_users_with_all_team_access(teams)
+    create_teams(teams, pteams, access_token)
+    create_team_rules(teams, pteams, access_token)
+    assign_users_to_team(pteams, teams, all_team_access, hive_staff, access_token)
 
     elapsed_time = time.time() - start_time
     print(f"[Diagnostic] [Teams] Time Taken: {elapsed_time}")
