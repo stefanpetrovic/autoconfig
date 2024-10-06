@@ -52,8 +52,6 @@ def populate_subdomain_owners(repos):
         if repo['Team'] not in subdomains[repo['Subdomain']]:
             subdomains[repo['Subdomain']].append(repo['Team'])
 
-    subdomains["Databricks"] = ["panther"]
-
     return subdomains
 
 

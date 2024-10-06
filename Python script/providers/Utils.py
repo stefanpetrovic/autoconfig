@@ -35,33 +35,43 @@ def environment_service_exist(env_id, phoenix_components, servicename):
 
 
 # Function to calculate criticality based on tier value
-def calculate_criticality(tier):
-    criticality = 5
-    if tier == "0":
-        criticality = 10
-    elif tier == "1":
-        criticality = 9
-    elif tier == "2":
-        criticality = 8
-    elif tier == "3":
-        criticality = 7
-    elif tier == "4":
-        criticality = 6
-    return criticality
+#def calculate_criticality(tier):
+#    criticality = 5
+#    if tier == "0":
+#        criticality = 10
+#    elif tier == "1":
+#        criticality = 9
+#    elif tier == "2":
+#        criticality = 8
+#    elif tier == "3":
+#        criticality = 7
+#    elif tier == "4":
+#        criticality = 6
+#    return criticality
 
-# Function to calculate criticality based on tier value
+# Function to calculate criticality based on tier value Tier 1 is the most critical tier 10 is the least critical, tier 6 is neutral tier 
 def calculate_criticality(tier):
     criticality = 5
-    if tier == "0":
+    if tier == "1":
         criticality = 10
-    elif tier == "1":
-        criticality = 9
     elif tier == "2":
-        criticality = 8
+        criticality = 9
     elif tier == "3":
-        criticality = 7
+        criticality = 8
     elif tier == "4":
+        criticality = 7
+    elif tier == "5":
         criticality = 6
+    elif tier == "6":
+        criticality = 5
+    elif tier == "7":
+        criticality = 4
+    elif tier == "8":
+        criticality = 3
+    elif tier == "9":
+        criticality = 2
+    elif tier == "10":
+        criticality = 10
     return criticality
 
 # Function to populate users who have access to all teams
@@ -76,12 +86,13 @@ def populate_users_with_all_team_access(teams):
         except Exception as e:
             print(str(e))
             exit(1)
-    all_access.append("bernard.wright@clear.bank")
+    #this gives super user access to the ciso or who else wants access
+    all_access.append("ciso@company.com")
     return all_access
 
 # Function to check if a member exists in the given team or override list
 def does_member_exist(email, team, hive_staff, all_team_access):
-    override_list = ["russell.miles@clear.bank", "neil.syrett@clear.bank"]
+    override_list = ["admin1@company.com", "admin1@company.com"]
     
     if email in override_list or email in all_team_access:
         return True
