@@ -2,6 +2,7 @@ import base64
 import requests
 import json
 import time
+from multipledispatch import dispatch
 
 APIdomain = "https://api.demo.appsecphx.io"
 
@@ -533,7 +534,7 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
             print(f"Error: {e}")
             exit(1)
 
-
+@dispatch(list,list,list,list,str)
 def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_token):
     """
     This function assigns users to teams by checking if users are already part of the team, and adds or removes them accordingly.
@@ -932,7 +933,7 @@ def environment_service_exist(env_id, phoenix_components, service_name):
         if component['Name'] == service_name and component['EnvironmentID'] == env_id:
             return True
     return False
-
+@dispatch(list,list,list,str)
 def assign_users_to_team(p_teams, all_team_access, teams, headers):
     for pteam in p_teams:
         team_members = get_phoenix_team_members(pteam['id'], headers)
