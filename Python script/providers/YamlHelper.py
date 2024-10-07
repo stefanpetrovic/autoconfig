@@ -106,11 +106,11 @@ def populate_hives(resource_folder):
         for team in hive['Teams']:
             products = []
             if team.get('Product'):
-                products = [p.strip().lower().replace(" ", ".") + "@clear.bank"
+                products = [p.strip().lower().replace(" ", ".") + "@company.com"
                             for p in team['Product'].split(' and ')]
 
             hive_object = {
-                'Lead': team['Lead'].strip().lower().replace(" ", ".") + "@clear.bank",
+                'Lead': team['Lead'].strip().lower().replace(" ", ".") + "@company.com",
                 'Product': products,
                 'Team': team['Name']
             }
