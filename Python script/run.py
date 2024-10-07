@@ -68,7 +68,8 @@ print("\n[Domains]")
 print(domains)
 
 print("\n[Repos]")
-print(repos)
+for repo in repos:
+    print(repo['RepositoryName'])
 
 # Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
 environments.append({

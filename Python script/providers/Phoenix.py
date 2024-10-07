@@ -2,6 +2,7 @@ import base64
 import requests
 import json
 import time
+from multipledispatch import dispatch
 
 APIdomain = "https://api.demo.appsecphx.io"
 
@@ -533,7 +534,7 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
             print(f"Error: {e}")
             exit(1)
 
-
+@dispatch(list,list,list,list,str)
 def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_token):
     """
     This function assigns users to teams by checking if users are already part of the team, and adds or removes them accordingly.
@@ -549,7 +550,7 @@ def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_tok
     
     for pteam in p_teams:
         # Fetch current team members from the Phoenix platform
-        team_members = get_phoenix_team_members(pteam['id'], access_token)
+        team_members = get_phoenix_team_members(pteam['id'], headers)
 
         for team in teams:
             if team['TeamName'] == pteam['name']:
@@ -559,30 +560,30 @@ def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_tok
                 for user_email in all_team_access:
                     found = any(member['email'] == user_email for member in team_members)
                     if not found:
-                        api_call_assign_users_to_team(pteam['id'], user_email, access_token)
+                        api_call_assign_users_to_team(pteam['id'], user_email, headers)
 
                 # Assign team members from the team if they are not part of the current team members
                 for team_member in team['TeamMembers']:
                     found = any(member['email'] == team_member['EmailAddress'] for member in team_members)
                     if not found:
-                        api_call_assign_users_to_team(pteam['id'], team_member['EmailAddress'], access_token)
+                        api_call_assign_users_to_team(pteam['id'], team_member['EmailAddress'], headers)
 
                 # Remove users who no longer exist in the team members
                 for member in team_members:
                     found = does_member_exist(member['email'], team, hive_staff, all_team_access)
                     if not found:
-                        delete_team_member(member['email'], pteam['id'], access_token)
+                        delete_team_member(member['email'], pteam['id'], headers)
 
         # Assign Hive team lead and product owners to the team
         hive_team = next((hs for hs in hive_staff if hs['Team'].lower() == pteam['name'].lower()), None)
 
         if hive_team:
             print(f"> Adding team lead {hive_team['Lead']} to team {pteam['name']}")
-            api_call_assign_users_to_team(pteam['id'], hive_team['Lead'], access_token)
+            api_call_assign_users_to_team(pteam['id'], hive_team['Lead'], headers)
 
             for product_owner in hive_team['Product']:
                 print(f"> Adding Product Owner {product_owner} to team {pteam['name']}")
-                api_call_assign_users_to_team(pteam['id'], product_owner, access_token)
+                api_call_assign_users_to_team(pteam['id'], product_owner, headers)
 
 
 # ConstructAPIUrl Function
@@ -820,6 +821,7 @@ def delete_team_member(user_email, team_id, access_token):
     print(f"- Removed {user_email} from team {team_id}")
 
 # Helper function to check if a member exists
+@dispatch(str,dict,list,list)
 def does_member_exist(user_email, team, hive_staff, all_team_access):
     """
     Checks if a team member exists in the provided lists (team, hive_staff, or all_team_access).
@@ -893,7 +895,7 @@ def add_service(environment, service, tier, domain, subdomain_owners, headers):
 
 def calculate_criticality(tier):
     return tier
-
+@dispatch(str,dict,dict)
 def does_member_exist(email, team, headers):
     """
     Check if a member with a specific email exists in the given team.
@@ -932,7 +934,7 @@ def environment_service_exist(env_id, phoenix_components, service_name):
         if component['Name'] == service_name and component['EnvironmentID'] == env_id:
             return True
     return False
-
+@dispatch(list,list,list,str)
 def assign_users_to_team(p_teams, all_team_access, teams, headers):
     for pteam in p_teams:
         team_members = get_phoenix_team_members(pteam['id'], headers)

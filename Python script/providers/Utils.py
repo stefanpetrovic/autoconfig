@@ -2,9 +2,9 @@
 def populate_domains(repos):
     domains = []
     for repo in repos:
-        for dom in repo['Domain']:
-            if dom not in domains:
-                domains.append(dom)
+        dom= repo['Domain']
+        if dom not in domains:
+            domains.append(dom)
     return domains
 
 # Function to retrieve unique subdomains from repos
