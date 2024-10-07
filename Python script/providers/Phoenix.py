@@ -549,7 +549,7 @@ def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_tok
     
     for pteam in p_teams:
         # Fetch current team members from the Phoenix platform
-        team_members = get_phoenix_team_members(pteam['id'], access_token)
+        team_members = get_phoenix_team_members(pteam['id'], headers)
 
         for team in teams:
             if team['TeamName'] == pteam['name']:
