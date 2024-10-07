@@ -821,6 +821,7 @@ def delete_team_member(user_email, team_id, access_token):
     print(f"- Removed {user_email} from team {team_id}")
 
 # Helper function to check if a member exists
+@dispatch(str,dict,list,list)
 def does_member_exist(user_email, team, hive_staff, all_team_access):
     """
     Checks if a team member exists in the provided lists (team, hive_staff, or all_team_access).
@@ -894,7 +895,7 @@ def add_service(environment, service, tier, domain, subdomain_owners, headers):
 
 def calculate_criticality(tier):
     return tier
-
+@dispatch(str,dict,dict)
 def does_member_exist(email, team, headers):
     """
     Check if a member with a specific email exists in the given team.
