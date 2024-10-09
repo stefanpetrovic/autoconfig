@@ -4,7 +4,7 @@ import json
 import time
 from multipledispatch import dispatch
 
-APIdomain = "https://api.demo.appsecphx.io"
+APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
 
 def get_auth_token(clientID, clientSecret, retries=3):
     credentials = f"{clientID}:{clientSecret}".encode('utf-8')
