@@ -48,7 +48,7 @@ teams = populate_teams(resource_folder)
 hive_staff = populate_hives(resource_folder)  # List of Hive team staff
 subdomain_owners = populate_subdomain_owners(repos)
 subdomains = get_subdomains(repos)
-
+access_token = get_auth_token(client_id, client_secret)
 pteams = populate_phoenix_teams(access_token)  # Pre-existing Phoenix teams
 all_team_access = []  # Populate users with full team access (this needs to be implemented)
 

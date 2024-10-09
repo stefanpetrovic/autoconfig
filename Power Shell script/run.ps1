@@ -82,7 +82,7 @@ $environments += [PSCustomObject]@{
 $environments += [PSCustomObject]@{
     Name          = "Development"
     Criticality   = 5
-    CloudAccounts = #cloud account / resource name that make dev
+    CloudAccounts = ""#cloud account / resource name that make dev
 }
 
 $environments += [PSCustomObject]@{
@@ -100,13 +100,13 @@ $environments += [PSCustomObject]@{
 $environments += [PSCustomObject]@{
     Name          = "SIM"
     Criticality   = 8
-    CloudAccounts =  #cloud account / resource name that make SIMULATION
+    CloudAccounts = "" #cloud account / resource name that make SIMULATION
 }
 
 $environments += [PSCustomObject]@{
     Name          = "Staging"
     Criticality   = 7
-    CloudAccounts = #cloud account / resource name that make STAGING
+    CloudAccounts ="" #cloud account / resource name that make STAGING
 }
 
 $accessToken = GetAuthToken $clientID $clientSecret

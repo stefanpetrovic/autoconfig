@@ -1,4 +1,4 @@
-$APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
+$APIdomain = "https://api.demo.appsecphx.io"
 
 function GetAuthToken ($clientID, $clientSecret) {
     # Convert client ID and secret to Base64 for Basic Auth
