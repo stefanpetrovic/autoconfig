@@ -82,17 +82,6 @@ def add_environment_services(subdomains, application_environments, phoenix_compo
                 build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
                 add_service_rule_batch(environment, group_name, "pipeline", build_definitions, access_token)
 
-            compute_service_rules = [
-                ("bacs", "Compute"),
-                ("shared", "Compute"),
-                ("account", "Compute"),
-                ("mccy", "Compute"),
-                ("chaps", "Compute"),
-                ("fps", "Compute"),
-                ("system", "Compute")
-            ]
-            for tag_value, service in compute_service_rules:
-                add_service_rule(environment, service, "node_type", tag_value, access_token)
 
 # AddContainerRule Function
 def add_container_rule(image, subdomain, environment_name, access_token):
@@ -732,12 +721,6 @@ def remove_old_tags(phoenix_components, repos, override_list):
     print("Removing old tags")
 
     for repo in repos:
-        # Replace FX with Foreign Exchange(FX) in domain and subdomain
-        if repo['Domain'] == "FX":
-            repo['Domain'] = "Foreign Exchange(FX)"
-        
-        if repo['Subdomain'] == "FX":
-            repo['Subdomain'] = "Foreign Exchange(FX)"
         
         # Apply overrides from the override list
         for repo_override in override_list:
@@ -748,8 +731,8 @@ def remove_old_tags(phoenix_components, repos, override_list):
         for component in phoenix_components:
             if repo['RepositoryName'] == component['name']:
                 print(f"Repo: {repo['RepositoryName']}")
-                get_tag_value("domain", component['tags'], repo['Domain'])
-                get_tag_value("subdomain", component['tags'], repo['Subdomain'])
+                #get_tag_value("domain", component['tags'], repo['Domain'])
+                #get_tag_value("subdomain", component['tags'], repo['Subdomain'])
                 get_tag_value("pteam", component['tags'], repo['Team'])
 
 def get_tag_value(tag_name, source_tags, expected_value):
@@ -861,11 +844,6 @@ def populate_applications_and_environments(headers):
     return components
 
 def add_service(environment, service, tier, domain, subdomain_owners, headers):
-    if domain == "FX":
-        domain = "Foreign Exchange(FX)"
-    if service == "FX":
-        service = "Foreign Exchange(FX)"
-
     criticality = calculate_criticality(tier)
 
     try:
@@ -912,11 +890,7 @@ def does_member_exist(email, team, headers):
 
 def add_thirdparty_services(phoenix_components, application_environments, subdomain_owners, headers):
     services = [
-        "Salesforce", "Sharepoint", "Dynamics", "Vulcan", "IriusRisk", "Resolver",
-        "Snyk", "e-learning", "Dynatrace", "Pagerduty", "PTRG", "Freshdesk", "Huggg",
-        "Lastpass", "LinkedIn", "Hacksplaining", "Hava", "Panorays", "Healix", "ADP",
-        "Power BI", "Power Platform", "Sentinel", "Panorays", "CultureAI", "Workable",
-        "Elastic Cloud", "Zscaler", "Tableau", "Exela", "Purview"
+        "Salesforce", #example of 3rd party app to add components and findings to 3rd parties
     ]
 
     env_name = "Thirdparty"
