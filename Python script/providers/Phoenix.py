@@ -405,7 +405,7 @@ def create_teams(teams, pteams, access_token):
     - access_token: Access token for API authentication.
     """
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
-    
+    new_pteams = []
     # Iterate over the list of teams to be added
     for team in teams:
         found = False
@@ -432,6 +432,8 @@ def create_teams(teams, pteams, access_token):
                 # Make the POST request to add the team
                 response = requests.post(api_url, headers=headers, json=payload)
                 response.raise_for_status()
+                team['id'] = response.json()['id']
+                new_pteams.append(response.json())
                 print(f"+ Team {team['TeamName']} added.")
             
             except requests.exceptions.RequestException as e:
@@ -440,6 +442,7 @@ def create_teams(teams, pteams, access_token):
                 else:
                     print(f"Error: {e}")
                     exit(1)
+    return new_pteams
 
 
 def populate_phoenix_teams(access_token):
@@ -534,8 +537,8 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
             print(f"Error: {e}")
             exit(1)
 
-@dispatch(list,list,list,list,str)
-def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_token):
+@dispatch(list,list,list,list,list,str)
+def assign_users_to_team(p_teams, new_pteams, teams, all_team_access, hive_staff, access_token):
     """
     This function assigns users to teams by checking if users are already part of the team, and adds or removes them accordingly.
     
@@ -547,8 +550,8 @@ def assign_users_to_team(p_teams, teams, all_team_access, hive_staff, access_tok
     - access_token: API authentication token.
     """
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
-    
-    for pteam in p_teams:
+    all_pteams = p_teams + new_pteams
+    for pteam in all_pteams:
         # Fetch current team members from the Phoenix platform
         team_members = get_phoenix_team_members(pteam['id'], headers)
 
@@ -934,25 +937,6 @@ def environment_service_exist(env_id, phoenix_components, service_name):
         if component['Name'] == service_name and component['EnvironmentID'] == env_id:
             return True
     return False
-@dispatch(list,list,list,str)
-def assign_users_to_team(p_teams, all_team_access, teams, headers):
-    for pteam in p_teams:
-        team_members = get_phoenix_team_members(pteam['id'], headers)
-
-        for team in teams:
-            if team["TeamName"] == pteam["name"]:
-                print(f"[Team] {pteam['name']}")
-                for m in all_team_access:
-                    if not any(member["email"] == m for member in team_members):
-                        api_call_assign_users_to_team(pteam["id"], m, headers)
-
-                for team_member in team["TeamMembers"]:
-                    if not any(member["email"] == team_member["EmailAddress"] for member in team_members):
-                        api_call_assign_users_to_team(pteam["id"], team_member["EmailAddress"], headers)
-
-                for member in team_members:
-                    if not does_member_exist(member["email"], team, headers):
-                        delete_team_member(member["email"], pteam["id"], headers)
 
 def get_phoenix_team_members(team_id, headers):
     try:
@@ -964,7 +948,7 @@ def get_phoenix_team_members(team_id, headers):
         return []
 
 def api_call_assign_users_to_team(team_id, email, headers):
-    payload = {"users": [{"email": email}]}
+    payload = {"users": [{"email": email}], "autoCreateUsers": True}
 
     try:
         api_url = construct_api_url(f"/v1/teams/{team_id}/users")

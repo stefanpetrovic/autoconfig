@@ -118,6 +118,8 @@ headers = {
 
 phoenix_components = get_phoenix_components(access_token)
 pteams = populate_phoenix_teams(access_token)
+# pteams created in this run
+new_pteams = []
 
 app_environments = []  # Should be populated using the equivalent PopulateApplicationsAndEnvironments
 
@@ -128,9 +130,9 @@ start_time = time.time()
 if action_teams:
     print("Performing Teams Actions")
     all_team_access = populate_users_with_all_team_access(teams)
-    create_teams(teams, pteams, access_token)
+    new_pteams = create_teams(teams, pteams, access_token)
     create_team_rules(teams, pteams, access_token)
-    assign_users_to_team(pteams, teams, all_team_access, hive_staff, access_token)
+    assign_users_to_team(pteams, new_pteams, teams, all_team_access, hive_staff, access_token)
 
     elapsed_time = time.time() - start_time
     print(f"[Diagnostic] [Teams] Time Taken: {elapsed_time}")
