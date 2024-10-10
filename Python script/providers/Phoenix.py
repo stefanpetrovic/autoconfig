@@ -3,6 +3,7 @@ import requests
 import json
 import time
 from multipledispatch import dispatch
+from providers.Utils import group_repos_by_subdomain
 
 APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
 
@@ -41,7 +42,7 @@ def create_environment(name, criticality, env_type, headers):
         "subType": env_type,
         "criticality": criticality,
         "owner": {
-            "email": "admin@company.com"
+            "email": "joe.doe@company.com"
         }
     }
 
@@ -58,7 +59,7 @@ def create_environment(name, criticality, env_type, headers):
             exit(1)
 
 # AddEnvironmentServices Function
-def add_environment_services(subdomains, application_environments, phoenix_components, subdomain_owners, teams, access_token):
+def add_environment_services(repos, subdomains, environments, application_environments, phoenix_components, subdomain_owners, teams, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
 
     for environment in environments:
@@ -70,17 +71,17 @@ def add_environment_services(subdomains, application_environments, phoenix_compo
         if environment['CloudAccounts']:
             for subdomain in subdomains:
                 if not environment_service_exist(env_id, phoenix_components, subdomain['Name']):
-                    add_service(env_name, subdomain['Name'], subdomain['Tier'], subdomain['Domain'], subdomain_owners, access_token)
+                    add_service(env_name, subdomain['Name'], subdomain['Tier'], subdomain['Domain'], subdomain_owners, headers)
 
             if not environment_service_exist(env_id, phoenix_components, "Databricks"):
-                add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, access_token)
+                add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
 
             grouped_repos = group_repos_by_subdomain(repos)
 
-            for group_name, repos_in_subdomain in grouped_repos.items():
+            for group_name, repos_in_subdomain in grouped_repos:
                 print(f"Subdomain: {group_name}")
                 build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
-                add_service_rule_batch(environment, group_name, "pipeline", build_definitions, access_token)
+                add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
 
 
 # AddContainerRule Function
@@ -902,13 +903,14 @@ def add_thirdparty_services(phoenix_components, application_environments, subdom
 
 def get_environment_id(application_environments, env_name):
     for environment in application_environments:
-        if environment["Name"] == env_name:
-            return environment["ID"]
+        if environment["name"] == env_name:
+            return environment["id"]
     return None
 
 def environment_service_exist(env_id, phoenix_components, service_name):
     for component in phoenix_components:
-        if component['Name'] == service_name and component['EnvironmentID'] == env_id:
+        print(f"Component {component}")
+        if component['name'] == service_name and component['applicationId'] == env_id:
             return True
     return False
 

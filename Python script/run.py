@@ -1,10 +1,10 @@
 import time
 import csv
 import os
-from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team
+from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services
 from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
 from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners
-from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
+#from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
 # Global Variables
 resource_folder = os.path.join(os.path.dirname(__file__), 'Resources')
@@ -50,7 +50,7 @@ subdomain_owners = populate_subdomain_owners(repos)
 subdomains = get_subdomains(repos)
 access_token = get_auth_token(client_id, client_secret)
 pteams = populate_phoenix_teams(access_token)  # Pre-existing Phoenix teams
-all_team_access = []  # Populate users with full team access (this needs to be implemented)
+all_team_access = populate_users_with_all_team_access(teams)  # Populate users with full team access
 
 
 # Display teams
@@ -74,38 +74,38 @@ for repo in repos:
 # Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
 environments.append({
     'Name': 'Production',
-    'Criticality': 1,
+    'Criticality': 10,
     'CloudAccounts': ["", ""]
 })
 
 environments.append({
     'Name': 'Development',
-    'Criticality': 6,
-    'CloudAccounts': []
+    'Criticality': 5,
+    'CloudAccounts': [""]
 })
 
 environments.append({
     'Name': 'DevOPS',
-    'Criticality': 7,
+    'Criticality': 5,
     'CloudAccounts': [""]
 })
 
 environments.append({
     'Name': 'Thirdparty',
-    'Criticality': 4,
+    'Criticality': 5,
     'CloudAccounts': [""]
 })
 
 environments.append({
     'Name': 'SIM',
     'Criticality': 8,
-    'CloudAccounts': []
+    'CloudAccounts': [""]
 })
 
 environments.append({
     'Name': 'Staging',
-    'Criticality': 9,
-    'CloudAccounts': []
+    'Criticality': 7,
+    'CloudAccounts': [""]
 })
 
 # Get authentication token
@@ -121,7 +121,7 @@ pteams = populate_phoenix_teams(access_token)
 # pteams created in this run
 new_pteams = []
 
-app_environments = []  # Should be populated using the equivalent PopulateApplicationsAndEnvironments
+app_environments = populate_applications_and_environments(headers)  # Should be populated using the equivalent PopulateApplicationsAndEnvironments
 
 # Stopwatch logic
 start_time = time.time()
@@ -142,68 +142,72 @@ if action_teams:
 if action_cloud:
     print("Performing Cloud Actions")
     for environment in environments:
-        if not any(env['Name'] == environment['Name'] and env.get('type') == "ENVIRONMENT" for env in app_environments):
+        if not any(env['name'] == environment['Name'] and env.get('type') == "ENVIRONMENT" for env in app_environments):
             # Create environments as needed
             print(f"Creating environment: {environment['Name']}")
+            create_environment(environment['Name'], environment['Criticality'], 'CLOUD', headers)
 
     # Perform cloud services
+    add_environment_services(repos, subdomains, environments, app_environments, phoenix_components, subdomain_owners, teams, access_token)
     print("[Diagnostic] [Cloud] Time Taken:", time.time() - start_time)
     print("Starting Cloud Asset Rules")
+    add_cloud_asset_rules(repos, access_token)
     print("[Diagnostic] [Cloud] Time Taken:", time.time() - start_time)
     print("Starting Third Party Rules")
+    add_thirdparty_services(phoenix_components, app_environments, subdomain_owners, headers)
     
     elapsed_time = time.time() - start_time
     print(f"[Diagnostic] [Cloud] Time Taken: {elapsed_time}")
     start_time = time.time()
 
 # Code actions
-if action_code:
-    cluster_images = []
+# if action_code:
+#     cluster_images = []
 
-    file = "AKSImages.csv"
-    subscriptions = get_subscriptions()
+#     file = "AKSImages.csv"
+#     subscriptions = get_subscriptions()
 
-    for subscription in subscriptions:
-        print(subscription['Name'])
-        clusters = get_clusters(subscription)
-        for cluster in clusters:
-            cluster_images.extend(get_cluster_images(cluster))
+#     for subscription in subscriptions:
+#         print(subscription['Name'])
+#         clusters = get_clusters(subscription)
+#         for cluster in clusters:
+#             cluster_images.extend(get_cluster_images(cluster))
 
-        print(f"Total Images Tally: {len(cluster_images)}")
+#         print(f"Total Images Tally: {len(cluster_images)}")
 
-        if cluster_images:
-            with open(file, 'w', newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow(cluster_images)
+#         if cluster_images:
+#             with open(file, 'w', newline='') as csvfile:
+#                 writer = csv.writer(csvfile)
+#                 writer.writerow(cluster_images)
 
-        time.sleep(5)
+#         time.sleep(5)
 
-    if os.path.exists(file):
-        print(f"Processing {file}")
-        with open(file, 'r') as csvfile:
-            csv_data = csv.DictReader(csvfile)
+#     if os.path.exists(file):
+#         print(f"Processing {file}")
+#         with open(file, 'r') as csvfile:
+#             csv_data = csv.DictReader(csvfile)
 
-            service_lookup = {"workload-identity-webhook": "Compute"}
+#             service_lookup = {"workload-identity-webhook": "Compute"}
 
-            for row in csv_data:
-                found = False
-                if row['Repo']:
-                    print(f"Row: {row['Repo']}")
-                    if row['Repo'] in service_lookup:
-                        environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
-                        if environment:
-                            print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
-                            found = True
+#             for row in csv_data:
+#                 found = False
+#                 if row['Repo']:
+#                     print(f"Row: {row['Repo']}")
+#                     if row['Repo'] in service_lookup:
+#                         environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
+#                         if environment:
+#                             print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
+#                             found = True
 
-                    if not found:
-                        repo = next((r for r in repos if r['RepositoryName'] == row['Repo']), None)
-                        if repo:
-                            print(f"Match found. Subdomain: {repo['Subdomain']}")
-                            environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
-                            if environment:
-                                print(f"Environment found: {environment['Name']}")
-                                print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
+#                     if not found:
+#                         repo = next((r for r in repos if r['RepositoryName'] == row['Repo']), None)
+#                         if repo:
+#                             print(f"Match found. Subdomain: {repo['Subdomain']}")
+#                             environment = next((env for env in environments if row['SubscriptionId'] in env['CloudAccounts']), None)
+#                             if environment:
+#                                 print(f"Environment found: {environment['Name']}")
+#                                 print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
 
-    # Perform code actions
-    print("Performing Code Actions")
-    print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
+#     # Perform code actions
+#     print("Performing Code Actions")
+#     print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")

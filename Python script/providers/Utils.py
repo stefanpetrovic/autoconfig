@@ -1,3 +1,5 @@
+from itertools import groupby
+
 # Function to populate unique domains from a list of repos
 def populate_domains(repos):
     domains = []
@@ -104,3 +106,12 @@ def does_member_exist(email, team, hive_staff, all_team_access):
     hive_staff_member = next((staff for staff in hive_staff if staff['Lead'] == email or email in staff['Product']), None)
     
     return hive_staff_member is not None
+
+# Function to group repos by 'Subdomain' key
+def group_repos_by_subdomain(repos):
+    # sort INFO data by 'company' key.
+    sorted_repos = sorted(repos, key=lambda k: k['Subdomain'])
+ 
+    return groupby(sorted_repos, lambda k: k['Subdomain'])
+
+    

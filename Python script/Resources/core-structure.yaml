@@ -9,8 +9,8 @@ DeploymentGroups:
       - BuildDefinitionName: product1
         Status: Production
         Type: Release
-        TeamName: axalot #name of the team as it appears in hyves and teams 
-        RepositoryName: reponame  #name of the repo as appears in phoenix
+        TeamName: axelot #name of the team as it appears in hives and teams 
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
@@ -19,7 +19,8 @@ DeploymentGroups:
         Status: Production
         Type: Release
         TeamName: lima
-        RepositoryName: repo2  #name of the repo as appears in phoenix
+        RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
+  #name of the repo as appears in phoenix
         Tier: 2 #importance from 1-10
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
