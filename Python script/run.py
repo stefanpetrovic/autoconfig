@@ -3,7 +3,7 @@ import csv
 import os
 from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services
 from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
-from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners
+from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups
 #from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
 # Global Variables
@@ -39,7 +39,7 @@ else:
     client_id = input("Please enter clientID: ")
     client_secret = input("Please enter clientSecret: ")
 
-environments = []
+environments = populate_environments_from_env_groups(resource_folder)
 
 # Populate data from various resources
 repos = populate_repositories(resource_folder)
@@ -72,41 +72,41 @@ for repo in repos:
     print(repo['RepositoryName'])
 
 # Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
-environments.append({
-    'Name': 'Production',
-    'Criticality': 10,
-    'CloudAccounts': ["", ""]
-})
+# environments.append({
+#     'Name': 'Production',
+#     'Criticality': 10,
+#     'CloudAccounts': ["", ""]
+# })
 
-environments.append({
-    'Name': 'Development',
-    'Criticality': 5,
-    'CloudAccounts': [""]
-})
+# environments.append({
+#     'Name': 'Development',
+#     'Criticality': 5,
+#     'CloudAccounts': [""]
+# })
 
-environments.append({
-    'Name': 'DevOPS',
-    'Criticality': 5,
-    'CloudAccounts': [""]
-})
+# environments.append({
+#     'Name': 'DevOPS',
+#     'Criticality': 5,
+#     'CloudAccounts': [""]
+# })
 
-environments.append({
-    'Name': 'Thirdparty',
-    'Criticality': 5,
-    'CloudAccounts': [""]
-})
+# environments.append({
+#     'Name': 'Thirdparty',
+#     'Criticality': 5,
+#     'CloudAccounts': [""]
+# })
 
-environments.append({
-    'Name': 'SIM',
-    'Criticality': 8,
-    'CloudAccounts': [""]
-})
+# environments.append({
+#     'Name': 'SIM',
+#     'Criticality': 8,
+#     'CloudAccounts': [""]
+# })
 
-environments.append({
-    'Name': 'Staging',
-    'Criticality': 7,
-    'CloudAccounts': [""]
-})
+# environments.append({
+#     'Name': 'Staging',
+#     'Criticality': 7,
+#     'CloudAccounts': [""]
+# })
 
 # Get authentication token
 access_token = get_auth_token(client_id, client_secret)
@@ -145,7 +145,7 @@ if action_cloud:
         if not any(env['name'] == environment['Name'] and env.get('type') == "ENVIRONMENT" for env in app_environments):
             # Create environments as needed
             print(f"Creating environment: {environment['Name']}")
-            create_environment(environment['Name'], environment['Criticality'], 'CLOUD', headers)
+            create_environment(environment['Name'], environment['Criticality'], environment['Type'], environment['Responsable'], environment['Status'], headers)
 
     # Perform cloud services
     add_environment_services(repos, subdomains, environments, app_environments, phoenix_components, subdomain_owners, teams, access_token)

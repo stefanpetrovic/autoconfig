@@ -34,7 +34,7 @@ DeploymentGroups:
           - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
           - Phoenix-ent-demo/vulnado
-        #name of the repo as appears in phoenix
+  #name of the repo as appears in phoenix
         Tier: 2 #importance from 1-10
         Domain: App1
         SubDomain: Prod
@@ -44,7 +44,7 @@ DeploymentGroups:
         Status: Production
         Type: Release
         TeamName: lima
-        RepositoryName: 
+        RepositoryName:
           - Security-Phoenix-demo/WebGoat-Legacy
           - Security-Phoenix-demo/WebGoat-Legacy
   #name of the repo as appears in phoenix
@@ -53,7 +53,7 @@ DeploymentGroups:
         SubDomain: Dev
 Environment Groups:
   - Name: Production
-    Type: Cloud
+    Type: CLOUD
     Status: Production
     Responsable: admin@admin.com
     Tier: 2 #importance from 1-10
@@ -74,9 +74,10 @@ Environment Groups:
       Tier: 2 #importance from 1-10
       TeamName: lima #name of the team as it appears in hives and teams  
   - Name: Dev
-    Type: Cloud
+    Type: CLOUD
     Status: Production
     Responsable: admin@admin.com
+    Tier: 5
     Tag: 
     Team:
     - Service: Group 1
@@ -88,7 +89,7 @@ Environment Groups:
       Association: Tag
       Association_value: asset.type:workload 
   - Name: Infra
-    Type: Infra
+    Type: INFRA
     Tier: 2 #importance from 1-10
     Responsable: admin@admin.com
     TeamName: axelot #name of the team as it appears in hives and teams 

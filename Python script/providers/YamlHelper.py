@@ -1,7 +1,7 @@
 import os
 import yaml
 from pathlib import Path
-
+from providers.Utils import calculate_criticality
 
 # Check if PyYAML module exists
 try:
@@ -52,6 +52,33 @@ def populate_repositories(resource_folder):
             repos.append(item)
 
     return repos
+
+
+# Function to populate environments
+def populate_environments_from_env_groups(resource_folder):
+    envs = []
+
+    if not resource_folder:
+        print("Please supply path for the resources")
+        return envs
+
+    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+
+    with open(banking_core, 'r') as stream:
+        repos_yaml = yaml.safe_load(stream)
+
+    for row in repos_yaml['Environment Groups']:
+        item = {
+            'Name': row['Name'],
+            'Type': row['Type'],
+            'Criticality': calculate_criticality(row['Tier']),
+            'CloudAccounts': [""],
+            'Status': row['Status'],
+            'Responsable': row['Responsable']
+        }
+        envs.append(item)
+
+    return envs
 
 
 # Function to populate subdomain owners

@@ -33,7 +33,7 @@ def get_auth_token(clientID, clientSecret, retries=3):
 def construct_api_url(endpoint):
     return f"{APIdomain}{endpoint}"
 
-def create_environment(name, criticality, env_type, headers):
+def create_environment(name, criticality, env_type, owner, status, headers):
     print("[Environment]")
 
     payload = {
@@ -42,8 +42,13 @@ def create_environment(name, criticality, env_type, headers):
         "subType": env_type,
         "criticality": criticality,
         "owner": {
-            "email": "joe.doe@company.com"
-        }
+            "email": owner
+        },
+        "tags": [
+            {
+                "value": status
+            }
+        ]
     }
 
     try:
@@ -56,6 +61,7 @@ def create_environment(name, criticality, env_type, headers):
             print(" > Environment already exists")
         else:
             print(f"Error: {e}")
+            print(f'Error message: {response.content}')
             exit(1)
 
 # AddEnvironmentServices Function
@@ -340,10 +346,10 @@ def add_cloud_asset_rules(repos, access_token):
         cloud_asset_rule(repo['Subdomain'], search_term, "Production", access_token)
 
     # Adding rules for PowerPlatform with different environments
-    cloud_asset_rule("PowerPlatform", "powerplatform_prod", "Production", access_token)
-    cloud_asset_rule("PowerPlatform", "powerplatform_sim", "Sim", access_token)
-    cloud_asset_rule("PowerPlatform", "powerplatform_staging", "Staging", access_token)
-    cloud_asset_rule("PowerPlatform", "powerplatform_dev", "Development", access_token)
+    #cloud_asset_rule("PowerPlatform", "powerplatform_prod", "Production", access_token)
+    #cloud_asset_rule("PowerPlatform", "powerplatform_sim", "Sim", access_token)
+    #cloud_asset_rule("PowerPlatform", "powerplatform_staging", "Staging", access_token)
+    #cloud_asset_rule("PowerPlatform", "powerplatform_dev", "Development", access_token)
 
 # CloudAssetRule Function
 def cloud_asset_rule(name, search_term, environment_name, access_token):
