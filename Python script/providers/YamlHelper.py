@@ -73,7 +73,7 @@ def populate_environments_from_env_groups(resource_folder):
 
     for row in repos_yaml['Environment Groups']:
         if not 'TeamName' in row:
-            print(f'Skipping environment {row['Name']}, as TeamName is missing.')
+            print(f"Skipping environment {row['Name']}, as TeamName is missing.")
             continue
 
         item = {
