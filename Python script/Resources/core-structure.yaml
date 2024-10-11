@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=BankingCore.schema.json
+AllAccessAccounts: # Not mandatory list of all access account emails
+ - ciso@company.com
 DeploymentGroups:
   - Name: Releases
     Status: NotStarted

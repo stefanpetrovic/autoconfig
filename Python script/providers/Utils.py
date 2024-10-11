@@ -77,7 +77,7 @@ def calculate_criticality(tier):
     return criticality
 
 # Function to populate users who have access to all teams
-def populate_users_with_all_team_access(teams):
+def populate_users_with_all_team_access(teams, defaultAllAccessAccounts):
     print("Populating the users with all team Access")
     all_access = []
     for team in teams:
@@ -89,7 +89,8 @@ def populate_users_with_all_team_access(teams):
             print(str(e))
             exit(1)
     #this gives super user access to the ciso or who else wants access
-    all_access.append("ciso@company.com")
+    print(f'Add default all access accounts: {defaultAllAccessAccounts}')
+    all_access.extend(defaultAllAccessAccounts)
     return all_access
 
 # Function to check if a member exists in the given team or override list

@@ -68,7 +68,6 @@ def create_environment(name, criticality, env_type, owner, status, team_name, he
             print(f'Error message: {response.content}')
             exit(1)
 
-# AddEnvironmentServices Function
 def add_environment_services(repos, subdomains, environments, application_environments, phoenix_components, subdomain_owners, teams, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
 
@@ -78,20 +77,46 @@ def add_environment_services(repos, subdomains, environments, application_enviro
 
         print(f"[Services] for {env_name}")
 
-        if environment['CloudAccounts']:
-            for subdomain in subdomains:
-                if not environment_service_exist(env_id, phoenix_components, subdomain['Name']):
-                    add_service(env_name, subdomain['Name'], subdomain['Tier'], subdomain['Domain'], subdomain_owners, headers)
+        if environment['Team']:
+            for service in environment['Team']:
+                if not environment_service_exist(env_id, phoenix_components, service['Service']):
+                    add_service(environment['Name'], service['Service'], service['Tier'], service['TeamName'], headers)
 
-            if not environment_service_exist(env_id, phoenix_components, "Databricks"):
-                add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
+            #if not environment_service_exist(env_id, phoenix_components, "Databricks"):
+            #    add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
 
-            grouped_repos = group_repos_by_subdomain(repos)
+            # Need to doublecheck this part
+            # grouped_repos = group_repos_by_subdomain(repos)
 
-            for group_name, repos_in_subdomain in grouped_repos:
-                print(f"Subdomain: {group_name}")
-                build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
-                add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
+            # for group_name, repos_in_subdomain in grouped_repos:
+            #     print(f"Subdomain: {group_name}")
+            #     build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
+            #     add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
+
+# AddEnvironmentServices Function
+# def add_environment_services(repos, subdomains, environments, application_environments, phoenix_components, subdomain_owners, teams, access_token):
+#     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
+
+#     for environment in environments:
+#         env_name = environment['Name']
+#         env_id = get_environment_id(application_environments, env_name)
+
+#         print(f"[Services] for {env_name}")
+
+#         if environment['CloudAccounts']:
+#             for subdomain in subdomains:
+#                 if not environment_service_exist(env_id, phoenix_components, subdomain['Name']):
+#                     add_service(env_name, subdomain['Name'], subdomain['Tier'], subdomain['Domain'], subdomain_owners, headers)
+
+#             if not environment_service_exist(env_id, phoenix_components, "Databricks"):
+#                 add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
+
+#             grouped_repos = group_repos_by_subdomain(repos)
+
+#             for group_name, repos_in_subdomain in grouped_repos:
+#                 print(f"Subdomain: {group_name}")
+#                 build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
+#                 add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
 
 
 # AddContainerRule Function
@@ -854,6 +879,30 @@ def populate_applications_and_environments(headers):
         exit(1)
 
     return components
+
+def add_service(applicationSelectorName, service, tier, team, headers):
+    criticality = calculate_criticality(tier)
+    try:
+        print(f"> Attempting to add {service}")
+        payload = {
+            "name": service,
+            "criticality": criticality,
+            "tags": [{"key": "pteam", "value": team}],
+            "applicationSelector": {
+                "name": applicationSelectorName
+            }
+        }
+        api_url = construct_api_url("/v1/components")
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f" + Added Service: {service}")
+        time.sleep(2)
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > Service {service} already exists")
+        else:
+            print(f"Error: {e}")
+            exit(1)
 
 def add_service(environment, service, tier, domain, subdomain_owners, headers):
     criticality = calculate_criticality(tier)

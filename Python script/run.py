@@ -3,7 +3,7 @@ import csv
 import os
 from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services
 from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
-from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups
+from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups, populate_all_access_emails
 #from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
 # Global Variables
@@ -50,7 +50,8 @@ subdomain_owners = populate_subdomain_owners(repos)
 subdomains = get_subdomains(repos)
 access_token = get_auth_token(client_id, client_secret)
 pteams = populate_phoenix_teams(access_token)  # Pre-existing Phoenix teams
-all_team_access = populate_users_with_all_team_access(teams)  # Populate users with full team access
+defaultAllAccessAccounts = populate_all_access_emails(resource_folder)
+all_team_access = populate_users_with_all_team_access(teams, defaultAllAccessAccounts)  # Populate users with full team access
 
 
 # Display teams
@@ -129,7 +130,7 @@ start_time = time.time()
 # Team actions
 if action_teams:
     print("Performing Teams Actions")
-    all_team_access = populate_users_with_all_team_access(teams)
+    all_team_access = populate_users_with_all_team_access(teams, defaultAllAccessAccounts)
     new_pteams = create_teams(teams, pteams, access_token)
     create_team_rules(teams, pteams, access_token)
     assign_users_to_team(pteams, new_pteams, teams, all_team_access, hive_staff, access_token)

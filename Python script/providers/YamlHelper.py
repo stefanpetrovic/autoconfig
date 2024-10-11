@@ -68,6 +68,10 @@ def populate_environments_from_env_groups(resource_folder):
         repos_yaml = yaml.safe_load(stream)
 
     for row in repos_yaml['Environment Groups']:
+        if not 'TeamName' in row:
+            print(f'Skipping environment {row['Name']}, as TeamName is missing.')
+            continue
+
         item = {
             'Name': row['Name'],
             'Type': row['Type'],
@@ -75,8 +79,19 @@ def populate_environments_from_env_groups(resource_folder):
             'CloudAccounts': [""],
             'Status': row['Status'],
             'Responsable': row['Responsable'],
-            'TeamName': row['TeamName']
+            'TeamName': row['TeamName'],
+            'Team': []
         }
+        for team in row['Team']:
+            service = {
+                'Service': team['Service'],
+                'Type': team['Type'],
+                'Association': team['Association'],
+                'Association_value': team['Association_value'],
+                'Tier': team['Tier'],
+                'TeamName': team['TeamName'] if team['TeamName'] else item['TeamName']
+            }
+            item['Team'].append(service)
         envs.append(item)
 
     return envs
@@ -161,3 +176,17 @@ def populate_hives(resource_folder):
             hives.append(hive_object)
 
     return hives
+
+def populate_all_access_emails(resource_folder):
+    all_access_emails = []
+
+    if not resource_folder:
+        print("Please supply path for the resources")
+        return all_access_emails
+
+    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+
+    with open(banking_core, 'r') as stream:
+        repos_yaml = yaml.safe_load(stream)
+
+    return repos_yaml['AllAccessAccounts']
