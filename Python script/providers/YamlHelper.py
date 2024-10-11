@@ -25,31 +25,35 @@ def populate_repositories(resource_folder):
     with open(banking_core, 'r') as stream:
         repos_yaml = yaml.safe_load(stream)
 
-    for row in repos_yaml['DeploymentGroups'][1]['BuildDefinitions']:
-        repositoryNames = row['RepositoryName']
-        if isinstance(repositoryNames, str):
-            item = {
-                'RepositoryName': repositoryNames,
-                'Domain': row['Domain'],
-                'Tier': row['Tier'],
-                'Subdomain': row['SubDomain'],
-                'Team': row['TeamName'],
-                'BuildDefinitionName': row['BuildDefinitionName']
-            }
-            repos.append(item)
+    for deployment_group in repos_yaml['DeploymentGroups']:
+        if 'BuildDefinitions' not in deployment_group:
             continue
+        
+        for row in deployment_group['BuildDefinitions']:
+            repositoryNames = row['RepositoryName']
+            if isinstance(repositoryNames, str):
+                item = {
+                    'RepositoryName': repositoryNames,
+                    'Domain': row['Domain'],
+                    'Tier': row['Tier'],
+                    'Subdomain': row['SubDomain'],
+                    'Team': row['TeamName'],
+                    'BuildDefinitionName': row['BuildDefinitionName']
+                }
+                repos.append(item)
+                continue
 
-        for repositoryName in repositoryNames:
-            print(f'Created repository {repositoryName}')
-            item = {
-                'RepositoryName': repositoryName,
-                'Domain': row['Domain'],
-                'Tier': row['Tier'],
-                'Subdomain': row['SubDomain'],
-                'Team': row['TeamName'],
-                'BuildDefinitionName': row['BuildDefinitionName']
-            }
-            repos.append(item)
+            for repositoryName in repositoryNames:
+                print(f'Created repository {repositoryName}')
+                item = {
+                    'RepositoryName': repositoryName,
+                    'Domain': row['Domain'],
+                    'Tier': row['Tier'],
+                    'Subdomain': row['SubDomain'],
+                    'Team': row['TeamName'],
+                    'BuildDefinitionName': row['BuildDefinitionName']
+                }
+                repos.append(item)
 
     return repos
 
