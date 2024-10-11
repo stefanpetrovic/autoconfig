@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=BankingCore.schema.json
+AllAccessAccounts: # Not mandatory list of all access account emails
+ - ciso@company.com
 DeploymentGroups:
   - Name: Releases
     Status: NotStarted
@@ -9,8 +11,8 @@ DeploymentGroups:
       - BuildDefinitionName: product1
         Status: Production
         Type: Release
-        TeamName: axalot #name of the team as it appears in hyves and teams 
-        RepositoryName: reponame  #name of the repo as appears in phoenix
+        TeamName: axelot #name of the team as it appears in hives and teams 
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
@@ -19,8 +21,92 @@ DeploymentGroups:
         Status: Production
         Type: Release
         TeamName: lima
-        RepositoryName: repo2  #name of the repo as appears in phoenix
+        RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
+  #name of the repo as appears in phoenix
         Tier: 2 #importance from 1-10
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
         AutomaticSecurityReview: false
+
+      - BuildDefinitionName: product2-prod
+        Status: Production
+        Type: Release
+        TeamName: lima
+        RepositoryName: 
+          - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
+          - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
+          - Phoenix-ent-demo/vulnado
+  #name of the repo as appears in phoenix
+        Tier: 2 #importance from 1-10
+        Domain: App1
+        SubDomain: Prod
+        AutomaticSecurityReview: false
+
+      - BuildDefinitionName: product2-dev
+        Status: Production
+        Type: Release
+        TeamName: lima
+        RepositoryName:
+          - Security-Phoenix-demo/WebGoat-Legacy
+          - Security-Phoenix-demo/WebGoat-Legacy
+  #name of the repo as appears in phoenix
+        Tier: 5 #importance from 1-10
+        Domain: App1
+        SubDomain: Dev
+Environment Groups:
+  - Name: Production
+    Type: CLOUD
+    Status: Production
+    Responsable: admin@admin.com
+    Tier: 2 #importance from 1-10
+    TeamName: lima #name of the team as it appears in hives and teams 
+    Status: Production
+    Tag: 
+    Team:
+    - Service: Group 1
+      Type: Cloud
+      Association: Tag
+      Association_value: issue-test-asset2
+      Tier: 2 #importance from 1-10
+      TeamName: lima #name of the team as it appears in hives and teams 
+    - Service: Group 2
+      Type: Container
+      Association: Tag
+      Association_value: asset.type:workload
+      Tier: 2 #importance from 1-10
+      TeamName: lima #name of the team as it appears in hives and teams  
+  - Name: Dev
+    Type: CLOUD
+    Status: Production
+    Responsable: admin@admin.com
+    Tier: 5
+    Tag: 
+    Team:
+    - Service: Group 1
+      Type: Cloud
+      Association: Tag
+      Association_value: issue-test-asset2
+    - Service: Group 2
+      Type: Cloud
+      Association: Tag
+      Association_value: asset.type:workload 
+  - Name: Infra
+    Type: INFRA
+    Tier: 2 #importance from 1-10
+    Responsable: admin@admin.com
+    TeamName: axelot #name of the team as it appears in hives and teams 
+    Status: Production
+    Tag: 
+    Team:
+    - Service: Group 1
+      Type: Infra
+      Association: IP
+      Association_value: 10.1.1.0/24
+      Tier: 2 #importance from 1-10
+      TeamName: axelot #name of the team as it appears in hives and teams 
+    - Service: Group 2
+      Type: Infra
+      Association: IP
+      Association_value: 10.1.1.0/32
+      Tier: 2 #importance from 1-10
+      TeamName: axelot #name of the team as it appears in hives and teams 
