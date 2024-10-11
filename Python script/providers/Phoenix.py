@@ -384,6 +384,7 @@ def cloud_asset_rule(name, search_term, environment_name, access_token):
             print(f" > Cloud Asset Rule for {name} already exists")
         else:
             print(f"Error: {e}")
+            print(f"Error details: {response.content}")
 
 def create_teams(teams, pteams, access_token):
     """
@@ -909,7 +910,6 @@ def get_environment_id(application_environments, env_name):
 
 def environment_service_exist(env_id, phoenix_components, service_name):
     for component in phoenix_components:
-        print(f"Component {component}")
         if component['name'] == service_name and component['applicationId'] == env_id:
             return True
     return False

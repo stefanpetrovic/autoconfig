@@ -26,15 +26,30 @@ def populate_repositories(resource_folder):
         repos_yaml = yaml.safe_load(stream)
 
     for row in repos_yaml['DeploymentGroups'][1]['BuildDefinitions']:
-        item = {
-            'RepositoryName': row['RepositoryName'],
-            'Domain': row['Domain'],
-            'Tier': row['Tier'],
-            'Subdomain': row['SubDomain'],
-            'Team': row['TeamName'],
-            'BuildDefinitionName': row['BuildDefinitionName']
-        }
-        repos.append(item)
+        repositoryNames = row['RepositoryName']
+        if isinstance(repositoryNames, str):
+            item = {
+                'RepositoryName': repositoryNames,
+                'Domain': row['Domain'],
+                'Tier': row['Tier'],
+                'Subdomain': row['SubDomain'],
+                'Team': row['TeamName'],
+                'BuildDefinitionName': row['BuildDefinitionName']
+            }
+            repos.append(item)
+            continue
+
+        for repositoryName in repositoryNames:
+            print(f'Created repository {repositoryName}')
+            item = {
+                'RepositoryName': repositoryName,
+                'Domain': row['Domain'],
+                'Tier': row['Tier'],
+                'Subdomain': row['SubDomain'],
+                'Team': row['TeamName'],
+                'BuildDefinitionName': row['BuildDefinitionName']
+            }
+            repos.append(item)
 
     return repos
 
