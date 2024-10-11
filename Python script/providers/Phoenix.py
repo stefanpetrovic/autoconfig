@@ -123,9 +123,6 @@ def add_environment_services(repos, subdomains, environments, application_enviro
 def add_container_rule(image, subdomain, environment_name, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
 
-    if subdomain == "FX":
-        subdomain = "Foreign Exchange(FX)"
-
     rules = [{
         "name": image,
         "filter": {"keyLike": f"*{image}*"}
@@ -140,8 +137,7 @@ def add_container_rule(image, subdomain, environment_name, access_token):
 
 
 def add_service_rule_batch(environment, service, tag_name, tag_value, headers):
-    if service == "FX":
-        service = "Foreign Exchange(FX)"
+
 
     print(f"Adding Service Rule {service} to {environment['Name']}")
 
@@ -184,8 +180,6 @@ def add_service_rule_batch(environment, service, tag_name, tag_value, headers):
 def add_service_rule(environment, service, tag_name, tag_value, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
 
-    if service == "FX":
-        service = "Foreign Exchange(FX)"
 
     print(f"Adding Service Rule {service} tag {tag_value}")
 
