@@ -2,6 +2,7 @@ import time
 import csv
 import os
 from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services
+import providers.Phoenix as phoenix_module
 from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
 from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups, populate_all_access_emails
 #from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
@@ -21,10 +22,10 @@ args = sys.argv[1:]
 
 print("Arguments supplied:", len(args))
 
-if len(args) == 5:
+if len(args) == 6:
     client_id = args[0]
     client_secret = args[1]
-
+    phoenix_module.APIdomain = args[5]
     if args[2].lower() == "false":
         action_teams = False
 
