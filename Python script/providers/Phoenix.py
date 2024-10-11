@@ -197,52 +197,61 @@ def add_service_rule(environment, service, tag_name, tag_value, access_token):
         }]
     }
 
+def create_applications(applications, application_environments, headers):
+    print('[Applications]')
+    for application in applications:
+        if not any(env['name'] == application['AppName'] and env['type'] == "APPLICATION" for env in application_environments):
+            create_application(application, headers)
 
 
-
-def create_applications(subdomains, application_environments, headers):
-    print("[Applications]")
-    for subdomain in subdomains:
-        if not any(env['Name'] == subdomain['Name'] and env['type'] == "APPLICATION" for env in application_environments):
-            create_application(subdomain['Name'], subdomain['Domain'], headers)
-
-    create_application("Manual Workflows", "DevOPS", headers)
-    create_application("Testing", "DevOPS", headers)
-    create_application("Tests", "DevOPS", headers)
-
-def create_application(name, domain, headers):
-
+def create_application(app, headers):
     payload = {
-        "name": name,
+        "name": app['AppName'],
         "type": "APPLICATION",
-        "criticality": 5,
-        "tags": [{"key": "domain", "value": domain}],
-        "owner": {"email": "admin@company.com"}
+        "criticality": app['Criticality'],
+        "tags": [{"key": "pteam", "value": app['TeamName']}],
+        "owner": {"email": app['Responsable']}
     }
 
     try:
         api_url = construct_api_url("/v1/applications")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f" + Application {name} added")
+        print(f" + Application {app['AppName']} added")
         time.sleep(2)
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > Application {name} already exists")
+            print(f" > Application {app['AppName']} already exists")
         else:
             print(f"Error: {e}")
             exit(1)
-
-def create_custom_component(application, component_name, access_token):
-    headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
     
+    for component in app['Components']:
+        create_custom_component(app['AppName'], component, headers)
+
+
+def create_custom_component(applicationName, component, headers):
     # Payload creation
     payload = {
         "applicationSelector": {
-            "name": application
+            "name": applicationName
         },
-        "name": component_name,
-        "criticality": 5
+        "name": component['ComponentName'],
+        "criticality": component['Criticality'],
+        "tags": [
+            {
+                "key": "pteam",
+                "value": component['TeamName']
+            },
+            {
+                "key": "Status",
+                "value": component['Status']
+            },
+            {
+                "key": "Type",
+                "value": component['Type']
+            }
+        ]
     }
     
     # Convert the payload to JSON
@@ -252,14 +261,14 @@ def create_custom_component(application, component_name, access_token):
         # Making the POST request to add the custom component
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f"{component_name} component added.")
+        print(f"{component['ComponentName']} component added.")
         
         # Sleep for 2 seconds (equivalent to Start-Sleep -Seconds 2 in PowerShell)
         time.sleep(2)
         
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > Component {application} already exists")
+            print(f" > Component {component['ComponentName']} already exists")
         else:
             print(f"Error: {e}")
             exit(1)
@@ -929,8 +938,6 @@ def add_service(environment, service, tier, domain, subdomain_owners, headers):
             print(f"Error: {e}")
             exit(1)
 
-def calculate_criticality(tier):
-    return tier
 @dispatch(str,dict,dict)
 def does_member_exist(email, team, headers):
     """

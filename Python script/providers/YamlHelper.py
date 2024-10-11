@@ -194,3 +194,51 @@ def populate_all_access_emails(resource_folder):
         repos_yaml = yaml.safe_load(stream)
 
     return repos_yaml['AllAccessAccounts']
+
+# Populate applications
+def populate_applications(resource_folder):
+    apps = []
+
+    if not resource_folder:
+        print("Please supply path for the resources")
+        return apps
+
+    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+
+    with open(banking_core, 'r') as stream:
+        apps_yaml = yaml.safe_load(stream)
+
+    for row in apps_yaml['DeploymentGroups']:
+        if not 'TeamName' in row:
+            print(f"Skipping environment {row['AppName']}, as TeamName is missing.")
+            continue
+
+        app = {
+            'AppName': row['AppName'],
+            'Status': row['Status'],
+            'TeamName': row['TeamName'],
+            'ReleaseDefinitions': row['ReleaseDefinitions'],
+            'Responsable': row['Responsable'],
+            'Criticality': calculate_criticality(row['Tier']),
+            'Components': []
+        }
+
+        if not 'Components' in row:
+            continue
+
+        for component in row['Components']:
+            comp = {
+                'ComponentName': component['ComponentName'],
+                'Status': component['Status'],
+                'Type': component['Type'],
+                'TeamName': component['TeamName'] if component['TeamName'] else app['TeamName'],
+                'RepositoryName':component['RepositoryName'] if 'RepositoryName' in component else None,
+                'Criticality': calculate_criticality(component['Tier']),
+                'Domain': component['Domain'],
+                'SubDomain': component['SubDomain'],
+                'AutomaticSecurityReview': component['AutomaticSecurityReview'] if 'AutomaticSecurityReview' in component else None 
+            }
+            app['Components'].append(comp)
+        apps.append(app)
+
+    return apps

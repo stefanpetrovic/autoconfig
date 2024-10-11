@@ -2,13 +2,20 @@
 AllAccessAccounts: # Not mandatory list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - Name: Releases
+  - AppName: App12
     Status: NotStarted
+    TeamName: lima
     ReleaseDefinitions: []
-  - Name: Builds
+    Responsable: admin@admin.com
+    Tier: 2 #importance from 1-10
+  - AppName: App22
     Status: NotStarted
-    BuildDefinitions:
-      - BuildDefinitionName: product1
+    TeamName: lima
+    ReleaseDefinitions: []
+    Responsable: admin@admin.com
+    Tier: 2 
+    Components:
+      - ComponentName: product1
         Status: Production
         Type: Release
         TeamName: axelot #name of the team as it appears in hives and teams 
@@ -17,7 +24,7 @@ DeploymentGroups:
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
         AutomaticSecurityReview: false
-      - BuildDefinitionName: product1-repo2
+      - ComponentName: product1-repo2
         Status: Production
         Type: Release
         TeamName: lima
@@ -27,12 +34,17 @@ DeploymentGroups:
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
         AutomaticSecurityReview: false
-
-      - BuildDefinitionName: product2-prod
+  - AppName: App32
+    Status: NotStarted
+    TeamName: lima
+    ReleaseDefinitions: []
+    Responsable: admin@admin.com
+    Tier: 2
+    Components:
+      - ComponentName: product2-prod
         Status: Production
         Type: Release
         TeamName: lima
-        RepositoryName: 
           - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
           - Phoenix-ent-demo/vulnado
@@ -42,7 +54,7 @@ DeploymentGroups:
         SubDomain: Prod
         AutomaticSecurityReview: false
 
-      - BuildDefinitionName: product2-dev
+      - ComponentName: product2-dev
         Status: Production
         Type: Release
         TeamName: lima
@@ -80,7 +92,7 @@ Environment Groups:
     Status: Production
     Responsable: admin@admin.com
     Tier: 5
-    Tag: 
+    Tag: dev
     Team:
     - Service: Group 1
       Type: Cloud
@@ -96,7 +108,7 @@ Environment Groups:
     Responsable: admin@admin.com
     TeamName: axelot #name of the team as it appears in hives and teams 
     Status: Production
-    Tag: 
+    Tag: infra
     Team:
     - Service: Group 1
       Type: Infra
@@ -107,6 +119,6 @@ Environment Groups:
     - Service: Group 2
       Type: Infra
       Association: IP
-      Association_value: 10.1.1.0/32
+      Association_value: 10.2.2.0/24
       Tier: 2 #importance from 1-10
       TeamName: axelot #name of the team as it appears in hives and teams 

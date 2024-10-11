@@ -1,10 +1,10 @@
 import time
 import csv
 import os
-from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services
+from providers.Phoenix import get_phoenix_components, populate_phoenix_teams, get_auth_token , create_teams, create_team_rules, assign_users_to_team, populate_applications_and_environments, create_environment, add_environment_services, add_cloud_asset_rules, add_thirdparty_services, create_applications
 import providers.Phoenix as phoenix_module
 from providers.Utils import populate_domains, get_subdomains, populate_users_with_all_team_access
-from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups, populate_all_access_emails
+from providers.YamlHelper import populate_repositories, populate_teams, populate_hives, populate_subdomain_owners, populate_environments_from_env_groups, populate_all_access_emails, populate_applications
 #from providers.Aks import get_subscriptions, get_clusters, get_cluster_images
 
 # Global Variables
@@ -53,7 +53,7 @@ access_token = get_auth_token(client_id, client_secret)
 pteams = populate_phoenix_teams(access_token)  # Pre-existing Phoenix teams
 defaultAllAccessAccounts = populate_all_access_emails(resource_folder)
 all_team_access = populate_users_with_all_team_access(teams, defaultAllAccessAccounts)  # Populate users with full team access
-
+applications = populate_applications(resource_folder)
 
 # Display teams
 print("[Teams]")
@@ -72,43 +72,6 @@ print(domains)
 print("\n[Repos]")
 for repo in repos:
     print(repo['RepositoryName'])
-
-# Define environment data (as dictionaries since Python lacks PowerShell's PSCustomObject)
-# environments.append({
-#     'Name': 'Production',
-#     'Criticality': 10,
-#     'CloudAccounts': ["", ""]
-# })
-
-# environments.append({
-#     'Name': 'Development',
-#     'Criticality': 5,
-#     'CloudAccounts': [""]
-# })
-
-# environments.append({
-#     'Name': 'DevOPS',
-#     'Criticality': 5,
-#     'CloudAccounts': [""]
-# })
-
-# environments.append({
-#     'Name': 'Thirdparty',
-#     'Criticality': 5,
-#     'CloudAccounts': [""]
-# })
-
-# environments.append({
-#     'Name': 'SIM',
-#     'Criticality': 8,
-#     'CloudAccounts': [""]
-# })
-
-# environments.append({
-#     'Name': 'Staging',
-#     'Criticality': 7,
-#     'CloudAccounts': [""]
-# })
 
 # Get authentication token
 access_token = get_auth_token(client_id, client_secret)
@@ -162,6 +125,13 @@ if action_cloud:
     print(f"[Diagnostic] [Cloud] Time Taken: {elapsed_time}")
     start_time = time.time()
 
+print("Performing Code Actions")
+create_applications(applications, app_environments, headers)
+    
+print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
+
+
+
 # Code actions
 # if action_code:
 #     cluster_images = []
@@ -209,7 +179,3 @@ if action_cloud:
 #                             if environment:
 #                                 print(f"Environment found: {environment['Name']}")
 #                                 print(f"Adding container rule for {row['ContainerUrl']} in {environment['Name']}")
-
-#     # Perform code actions
-#     print("Performing Code Actions")
-#     print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
