@@ -33,7 +33,7 @@ def get_auth_token(clientID, clientSecret, retries=3):
 def construct_api_url(endpoint):
     return f"{APIdomain}{endpoint}"
 
-def create_environment(name, criticality, env_type, owner, status, headers):
+def create_environment(name, criticality, env_type, owner, status, team_name, headers):
     print("[Environment]")
 
     payload = {
@@ -47,6 +47,10 @@ def create_environment(name, criticality, env_type, owner, status, headers):
         "tags": [
             {
                 "value": status
+            },
+            {
+                "key": "pteam",
+                "value": team_name
             }
         ]
     }

@@ -145,7 +145,7 @@ if action_cloud:
         if not any(env['name'] == environment['Name'] and env.get('type') == "ENVIRONMENT" for env in app_environments):
             # Create environments as needed
             print(f"Creating environment: {environment['Name']}")
-            create_environment(environment['Name'], environment['Criticality'], environment['Type'], environment['Responsable'], environment['Status'], headers)
+            create_environment(environment['Name'], environment['Criticality'], environment['Type'], environment['Responsable'], environment['Status'], environment['TeamName'], headers)
 
     # Perform cloud services
     add_environment_services(repos, subdomains, environments, app_environments, phoenix_components, subdomain_owners, teams, access_token)

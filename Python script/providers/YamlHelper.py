@@ -74,7 +74,8 @@ def populate_environments_from_env_groups(resource_folder):
             'Criticality': calculate_criticality(row['Tier']),
             'CloudAccounts': [""],
             'Status': row['Status'],
-            'Responsable': row['Responsable']
+            'Responsable': row['Responsable'],
+            'TeamName': row['TeamName']
         }
         envs.append(item)
 
