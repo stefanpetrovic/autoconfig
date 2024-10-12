@@ -51,6 +51,7 @@ def environment_service_exist(env_id, phoenix_components, servicename):
 #        criticality = 6
 #    return criticality
 
+
 # Function to calculate criticality based on tier value Tier 1 is the most critical tier 10 is the least critical, tier 6 is neutral tier 
 def calculate_criticality(tier):
     criticality = 5
