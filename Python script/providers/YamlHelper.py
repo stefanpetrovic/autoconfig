@@ -35,7 +35,7 @@ def populate_repositories(resource_folder):
                 item = {
                     'RepositoryName': repositoryNames,
                     'Domain': row['Domain'],
-                    'Tier': row['Tier'],
+                    'Tier': row['Tier'] if 'Tier' in row else 5,
                     'Subdomain': row['SubDomain'],
                     'Team': row['TeamName'],
                     'BuildDefinitionName': row['BuildDefinitionName']
@@ -48,7 +48,7 @@ def populate_repositories(resource_folder):
                 item = {
                     'RepositoryName': repositoryName,
                     'Domain': row['Domain'],
-                    'Tier': row['Tier'],
+                    'Tier': row['Tier'] if 'Tier' in row else 5,
                     'Subdomain': row['SubDomain'],
                     'Team': row['TeamName'],
                     'BuildDefinitionName': row['BuildDefinitionName']
@@ -92,7 +92,7 @@ def populate_environments_from_env_groups(resource_folder):
                 'Type': team['Type'],
                 'Association': team['Association'],
                 'Association_value': team['Association_value'],
-                'Tier': team['Tier'],
+                'Tier': team['Tier'] if 'Tier' in team else 5,
                 'TeamName': team['TeamName'] if team['TeamName'] else item['TeamName']
             }
             item['Team'].append(service)
@@ -233,7 +233,7 @@ def populate_applications(resource_folder):
                 'Type': component['Type'],
                 'TeamName': component['TeamName'] if component['TeamName'] else app['TeamName'],
                 'RepositoryName':component['RepositoryName'] if 'RepositoryName' in component else None,
-                'Criticality': calculate_criticality(component['Tier']),
+                'Criticality': calculate_criticality(component['Tier'] if 'Tier' in component else 5),
                 'Domain': component['Domain'],
                 'SubDomain': component['SubDomain'],
                 'AutomaticSecurityReview': component['AutomaticSecurityReview'] if 'AutomaticSecurityReview' in component else None 
