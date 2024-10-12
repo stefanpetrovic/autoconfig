@@ -3,7 +3,7 @@ import requests
 import json
 import time
 from multipledispatch import dispatch
-from providers.Utils import group_repos_by_subdomain
+from providers.Utils import group_repos_by_subdomain, calculate_criticality
 
 APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
 
@@ -893,6 +893,8 @@ def populate_applications_and_environments(headers):
 
     return components
 
+# Add service 1
+@dispatch(str, str, int, str, dict)
 def add_service(applicationSelectorName, service, tier, team, headers):
     criticality = calculate_criticality(tier)
     try:
@@ -917,6 +919,7 @@ def add_service(applicationSelectorName, service, tier, team, headers):
             print(f"Error: {e}")
             exit(1)
 
+@dispatch(str, str, int, str, dict, dict)
 def add_service(environment, service, tier, domain, subdomain_owners, headers):
     criticality = calculate_criticality(tier)
 
@@ -967,6 +970,10 @@ def add_thirdparty_services(phoenix_components, application_environments, subdom
 
     env_name = "Thirdparty"
     env_id = get_environment_id(application_environments, env_name)
+
+    if not env_id:
+        print('Environment Thirdparty not found')
+        return
 
     for service in services:
         if not environment_service_exist(env_id, phoenix_components, service):
