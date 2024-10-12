@@ -2,20 +2,20 @@
 AllAccessAccounts: # Not mandatory list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - AppName: App12
+  - AppName: App123456
     Status: NotStarted
     TeamName: lima
     ReleaseDefinitions: []
     Responsable: admin@admin.com
     Tier: 2 #importance from 1-10
-  - AppName: App22
+  - AppName: App223456
     Status: NotStarted
     TeamName: lima
     ReleaseDefinitions: []
     Responsable: admin@admin.com
     Tier: 2 
     Components:
-      - ComponentName: product1
+      - ComponentName: product13456
         Status: Production
         Type: Release
         TeamName: axelot #name of the team as it appears in hives and teams 
@@ -24,7 +24,7 @@ DeploymentGroups:
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
         AutomaticSecurityReview: false
-      - ComponentName: product1-repo2
+      - ComponentName: product13456-repo2
         Status: Production
         Type: Release
         TeamName: lima
@@ -34,14 +34,14 @@ DeploymentGroups:
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
         AutomaticSecurityReview: false
-  - AppName: App32
+  - AppName: App323456
     Status: NotStarted
     TeamName: lima
     ReleaseDefinitions: []
     Responsable: admin@admin.com
     Tier: 2
     Components:
-      - ComponentName: product2-prod
+      - ComponentName: product23456-prod
         Status: Production
         Type: Release
         TeamName: lima
@@ -50,11 +50,11 @@ DeploymentGroups:
           - Phoenix-ent-demo/vulnado
   #name of the repo as appears in phoenix
         Tier: 2 #importance from 1-10
-        Domain: App1
+        Domain: App123456
         SubDomain: Prod
         AutomaticSecurityReview: false
 
-      - ComponentName: product2-dev
+      - ComponentName: product2456-dev
         Status: Production
         Type: Release
         TeamName: lima
@@ -63,7 +63,7 @@ DeploymentGroups:
           - Security-Phoenix-demo/WebGoat-Legacy
   #name of the repo as appears in phoenix
         Tier: 5 #importance from 1-10
-        Domain: App1
+        Domain: App123456
         SubDomain: Dev
 Environment Groups:
   - Name: Production

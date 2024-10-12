@@ -228,6 +228,7 @@ def create_application(app, headers):
     
     for component in app['Components']:
         create_custom_component(app['AppName'], component, headers)
+        create_custom_finding_rule(app, component, headers)
 
 
 def create_custom_component(applicationName, component, headers):
@@ -273,32 +274,31 @@ def create_custom_component(applicationName, component, headers):
             print(f"Error: {e}")
             exit(1)
 
-def create_custom_finding_rule(application, domain, component_name, access_token):
-    headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
+def create_custom_finding_rule(application, component, headers):
     
     # Create the payload
     payload = {
         "selector": {
             "applicationSelector": {
-                "name": application,
+                "name": application['AppName'],
                 "caseSensitive": False
             },
             "componentSelector": {
-                "name": component_name,
+                "name": component['ComponentName'],
                 "caseSensitive": False
             }
         },
         "rules": [
             {
-                "name": f"{application} {component_name}",
+                "name": f"{application['AppName']} {component['ComponentName']}",
                 "filter": {
                     "tags": [
                         {
                             "key": "subdomain",
-                            "value": application
+                            "value": application['AppName']
                         }
                     ],
-                    "repository": [component_name]
+                    "repository": get_repositories_from_component(component)
                 }
             }
         ]
@@ -310,17 +310,27 @@ def create_custom_finding_rule(application, domain, component_name, access_token
         # Make POST request to add the custom finding rule
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f"{component_name} rule added.")
+        print(f"{component['ComponentName']} rule added.")
         
         # Sleep for 2 seconds
         time.sleep(2)
         
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > Custom Component {component_name} already exists")
+            print(f" > Custom Component {component['ComponentName']} already exists")
         else:
             print(f"Error: {e}")
+            print(f'Error message {response.content}')
             exit(1)
+
+def get_repositories_from_component(component):
+    if not component['RepositoryName']:
+        return []
+    
+    if type(component['RepositoryName']) == str:
+        return [component['RepositoryName']]
+    
+    return component['RepositoryName']
 
 # CreateRepositories Function
 def create_repositories(repos, access_token):
