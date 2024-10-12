@@ -81,6 +81,9 @@ def add_environment_services(repos, subdomains, environments, application_enviro
             for service in environment['Team']:
                 if not environment_service_exist(env_id, phoenix_components, service['Service']):
                     add_service(environment['Name'], service['Service'], service['Tier'], service['TeamName'], headers)
+                
+                add_service_rule_batch(environment, service, headers)
+
 
             #if not environment_service_exist(env_id, phoenix_components, "Databricks"):
             #    add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
@@ -136,33 +139,40 @@ def add_container_rule(image, subdomain, environment_name, access_token):
     }
 
 
-def add_service_rule_batch(environment, service, tag_name, tag_value, headers):
-
-
-    print(f"Adding Service Rule {service} to {environment['Name']}")
-
-    payload = {
-        "selector": {
-            "applicationSelector": {
-                "name": environment['Name'],
-                "caseSensitive": False
-            },
-            "componentSelector": {
-                "name": service,
-                "caseSensitive": False
-            }
-        },
-        "rules": [
-            {
-                "name": f"{tag_name} {tag}",
-                "filter": {
-                    "tags": [{"key": tag_name, "value": tag}],
-                    "providerAccountId": environment.get("CloudAccounts")
+def add_service_rule_batch(environment, service, headers):
+    payload = None
+    if service['Association'] == 'Tag':
+        print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=Tag")
+    
+        tag_parts = service['Association_value'].split(':')
+        if not (len(tag_parts)) == 2:
+            print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
+            return
+        
+        payload = {
+            "selector": {
+                "applicationSelector": {
+                    "name": environment['Name'],
+                    "caseSensitive": False
+                },
+                "componentSelector": {
+                    "name": service['Service'],
+                    "caseSensitive": False
                 }
-            } for tag in tag_value
+            },
+            "rules": [
+                {
+                    "name": f"{tag_parts[0]} {tag_parts[1]}",
+                    "filter": {
+                        "tags": [{"key": tag_parts[0], "value": tag_parts[1]}]
+                    }
+                }
         ]
     }
 
+    if not payload:
+        return
+    
     try:
         api_url = construct_api_url("/v1/components/rules")
         response = requests.post(api_url, headers=headers, json=payload)
