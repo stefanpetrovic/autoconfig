@@ -35,7 +35,7 @@ def populate_repositories(resource_folder):
                 item = {
                     'RepositoryName': repositoryNames,
                     'Domain': row['Domain'],
-                    'Tier': row['Tier'] if 'Tier' in row else 5,
+                    'Tier': row['Tier']if 'Tier' in row else 5,
                     'Subdomain': row['SubDomain'],
                     'Team': row['TeamName'],
                     'BuildDefinitionName': row['BuildDefinitionName']
@@ -48,7 +48,7 @@ def populate_repositories(resource_folder):
                 item = {
                     'RepositoryName': repositoryName,
                     'Domain': row['Domain'],
-                    'Tier': row['Tier'] if 'Tier' in row else 5,
+                    'Tier': row['Tier']if 'Tier' in row else 5,
                     'Subdomain': row['SubDomain'],
                     'Team': row['TeamName'],
                     'BuildDefinitionName': row['BuildDefinitionName']
@@ -92,7 +92,7 @@ def populate_environments_from_env_groups(resource_folder):
                 'Type': team['Type'],
                 'Association': team['Association'],
                 'Association_value': team['Association_value'],
-                'Tier': team['Tier'] if 'Tier' in team else 5,
+                'Tier': team['Tier']if 'Tier' in row else 5,
                 'TeamName': team['TeamName'] if team['TeamName'] else item['TeamName']
             }
             item['Team'].append(service)
@@ -196,6 +196,8 @@ def populate_all_access_emails(resource_folder):
     return repos_yaml['AllAccessAccounts']
 
 # Populate applications
+
+# Populate applications
 def populate_applications(resource_folder):
     apps = []
 
@@ -203,9 +205,9 @@ def populate_applications(resource_folder):
         print("Please supply path for the resources")
         return apps
 
-    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+    core_structure = os.path.join(resource_folder, "core-structure.yaml")
 
-    with open(banking_core, 'r') as stream:
+    with open(core_structure, 'r') as stream:
         apps_yaml = yaml.safe_load(stream)
 
     for row in apps_yaml['DeploymentGroups']:
@@ -219,7 +221,7 @@ def populate_applications(resource_folder):
             'TeamName': row['TeamName'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
-            'Criticality': calculate_criticality(row['Tier'] if 'Tier' in row else 5),
+            'Criticality': calculate_criticality(row.get('Tier', 5)),  # Use .get() to handle missing 'Tier'
             'Components': []
         }
 
@@ -231,12 +233,12 @@ def populate_applications(resource_folder):
                 'ComponentName': component['ComponentName'],
                 'Status': component['Status'],
                 'Type': component['Type'],
-                'TeamName': component['TeamName'] if component['TeamName'] else app['TeamName'],
-                'RepositoryName':component['RepositoryName'] if 'RepositoryName' in component else None,
-                'Criticality': calculate_criticality(component['Tier'] if 'Tier' in component else 5),
-                'Domain': component['Domain'],
-                'SubDomain': component['SubDomain'],
-                'AutomaticSecurityReview': component['AutomaticSecurityReview'] if 'AutomaticSecurityReview' in component else None 
+                'TeamName': component.get('TeamName', app['TeamName']),  # Fallback to app's TeamName if missing
+                'RepositoryName': component.get('RepositoryName', None),  # Handle missing 'RepositoryName'
+                'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
+                'Domain': component.get('Domain', None),  # Handle missing 'Domain'
+                'SubDomain': component.get('SubDomain', None),  # Handle missing 'SubDomain'
+                'AutomaticSecurityReview': component.get('AutomaticSecurityReview', None)  # Handle missing 'AutomaticSecurityReview'
             }
             app['Components'].append(comp)
         apps.append(app)

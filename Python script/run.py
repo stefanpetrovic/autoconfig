@@ -125,10 +125,11 @@ if action_cloud:
     print(f"[Diagnostic] [Cloud] Time Taken: {elapsed_time}")
     start_time = time.time()
 
-print("Performing Code Actions")
-create_applications(applications, app_environments, headers)
-    
-print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
+if action_code:
+    print("Performing Code Actions")
+    create_applications(applications, app_environments, headers)
+        
+    print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
 
 
 

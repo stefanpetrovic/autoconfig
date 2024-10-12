@@ -5,7 +5,7 @@ import time
 from multipledispatch import dispatch
 from providers.Utils import group_repos_by_subdomain, calculate_criticality
 
-APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
+APIdomain = "https://api.demo.appsecphx.io"
 
 def get_auth_token(clientID, clientSecret, retries=3):
     credentials = f"{clientID}:{clientSecret}".encode('utf-8')
