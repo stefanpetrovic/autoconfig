@@ -219,7 +219,7 @@ def populate_applications(resource_folder):
             'TeamName': row['TeamName'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
-            'Criticality': calculate_criticality(row['Tier']),
+            'Criticality': calculate_criticality(row['Tier'] if 'Tier' in row else 5),
             'Components': []
         }
 
