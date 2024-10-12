@@ -145,9 +145,11 @@ def add_service_rule_batch(environment, service, headers):
         print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=Tag")
     
         tag_parts = service['Association_value'].split(':')
-        if not (len(tag_parts)) == 2:
-            print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
-            return
+        print(tag_parts)
+        print(len(tag_parts))
+        # if not (len(tag_parts)) == 2:
+        #     print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
+        #     return
         
         payload = {
             "selector": {
@@ -162,9 +164,10 @@ def add_service_rule_batch(environment, service, headers):
             },
             "rules": [
                 {
-                    "name": f"{tag_parts[0]} {tag_parts[1]}",
+                    "name": f"{tag_parts[0]} {tag_parts[1] if len(tag_parts) == 2 else ''}",
+
                     "filter": {
-                        "tags": [{"key": tag_parts[0], "value": tag_parts[1]}]
+                        "tags": [{"key": tag_parts[0] if len(tag_parts) == 2 else '', "value": tag_parts[1] if len(tag_parts) == 2 else tag_parts[0]}]
                     }
                 }
         ]
