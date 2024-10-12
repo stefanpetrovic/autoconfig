@@ -25,8 +25,6 @@ The service support flags to run key functions to help avoid exceeding the 60 mi
 
 As the job takes typically between 50 - 59 minutes (depending on the size of your org might take less) to complete it is only ran once a day as to not block other pipelines using the release agent.
 
-If required the job can be run adhoc from DevOPS.
-
 ## Obtaining Phoenix API Credentials
 
 **Note:** This is for testing hence it using separate credentials, for BAU the Credentials Called "API" in Phoenix are used.
@@ -36,9 +34,9 @@ When you run Run.ps1 locally it will prompt you for the
 - ClientID
 - Client Secret
 
-**Never checkin to code the credentials.**
+**Never check in to code the credentials.**
 
-1. Logon to [Phoenix] *your Phoenix Domain using SSO.
+1. Logon to [Phoenix] *your Phoenix Domain using SSO/Direct auth
 2. Click Settings.
 3. Click Organization.
 4. Click API Access.
@@ -47,13 +45,13 @@ When you run Run.ps1 locally it will prompt you for the
 
 ## API endpoint
 
-The Phoenix base endpoint for API requests is: [https://api.YOURDOMAIN.securityphoenix.cloud](https://api.YOURDOMAIN.securityphoenix.cloud)
+The Phoenix-based endpoint for API requests is: [https://api.YOURDOMAIN.securityphoenix.cloud](https://api.YOURDOMAIN.securityphoenix.cloud)
 
-## Obtaining Access token
+## Obtaining an Access token
 
 Using the Phoenix API Credentials you must obtain an Access token that is only valid for a limited amount of time to invoke the Phoenix API's.
 
-This is done via making a HTTP GET call to [v1/auth/access_token](https://YOURDOMAIN.securityphoenix.cloud/v1/auth/access_token).
+This is done via making an HTTP GET call to [v1/auth/access_token](https://YOURDOMAIN.securityphoenix.cloud/v1/auth/access_token).
 
 See function `GetAuthToken`.
 
@@ -64,6 +62,8 @@ The request to the API will contain a **Authorization** header with a basic base
 The byte array is "ClientId : clientSecret"
 
 ## Local Debugging
+
+To make the sctipt work the core-structure.yaml, teams (individual teams like axalot and lima) and hives.yaml needs to be customized, don't use those as is
 
 When running the code locally you will need to download `core-structure.yaml` and `hives.yaml` from Release data to a folder called `Resources`.
 
@@ -136,12 +136,16 @@ THe function is called [AddEnvironmentServices](Phoenix.ps1).
 
 Applications are groupings of code that provide functionality for a service. As per environment services the `subdomain` in `core-structure.yaml`.
 
+For python the application and component are created: in `core-structure.yaml`.
+
 The function is called [CreateApplications](Phoenix.ps1)
 
 ## Components
 
 Component can be create using one or more repositories, web apps, the guidance should be using one subdomain/component per team managing it. 
 `core-structure.yaml` contains these definitions from which rules are generated.
+
+in `core-structure.yaml` there is the specific declaration of application and components 
 
 Tiering from release data is used to help highlight important repositories.
 
