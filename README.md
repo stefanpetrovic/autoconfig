@@ -5,7 +5,7 @@ Date - 06 October 2024
 
 # Introduction
 
-This [repo](xxx) provides a method of getting data from your organization repos, teams and domains to [Phoenix](https://phoenix domain).
+This [repo](xxx) provides a method of getting data from your organization's repos, teams, and domains to [Phoenix](https://phoenix domain).
 
 The following API credentials are required:
 
@@ -13,23 +13,23 @@ The following API credentials are required:
 
 ## Customization
 
-The API and @company.com present in various part of the script for override should be changed with your comapny name and domain 
+The API and @company.com present in various parts of the script for override should be changed with your company name and domain. 
 
 ## Schedule
 
-The service support flags to run key functions to help avoid exceeding the 60 min cron limit.
+The service support flags run key functions to help avoid exceeding the 60 min cron limit.
 
 - teams - Creates new teams, assigns members to teams, removes members from teams they should no longer have access to (Defaults to true)
-- code - Creates applications (sub domains) and the associated components (repos) and rules (Defaults to true)
+- code - Creates applications (subdomains) and the associated components (repos) and rules (Defaults to true)
 - cloud - Create Cloud Environments and services (Subdomains) along with associated rules (Defaults to false)
 
-As the job takes typically between 50 - 59 minutes (depending on the size of your org might take less) to complete it is only ran once a day as to not block other pipelines using the release agent.
+As the job typically takes between 50 and 59 minutes to complete (depending on the size of your org, it might take less), it is only run once a day to prevent blocking other pipelines using the release agent.
 
 ## Obtaining Phoenix API Credentials
 
-**Note:** This is for testing hence it using separate credentials, for BAU the Credentials Called "API" in Phoenix are used.
+**Note:** This is for testing, hence the use of separate credentials; for BAU, the Credentials Called "API" in Phoenix are used.
 
-When you run Run.ps1 locally it will prompt you for the
+When you run Run.ps1 locally, it will prompt you for the
 
 - ClientID
 - Client Secret
@@ -59,11 +59,11 @@ The response will contain the access token.
 
 The request to the API will contain a **Authorization** header with a basic base64 encoded byte array.
 
-The byte array is "ClientId : clientSecret"
+The byte array is "ClientId : clientSecret."
 
 ## Local Debugging
 
-To make the sctipt work the core-structure.yaml, teams (individual teams like axalot and lima) and hives.yaml needs to be customized, don't use those as is
+To make the sctipt work the core-structure.yaml, teams (individual teams like axalot and lima) and hives.yaml needs to be customized; don't use those as is
 
 When running the code locally you will need to download `core-structure.yaml` and `hives.yaml` from Release data to a folder called `Resources`.
 
@@ -71,7 +71,7 @@ You will also need a copy of the `Teams` folder and its yaml
 
 ## Local Testing (optional) - Powershell
 
-The project uses Pester for testing. From a powershell command prompt type: `invoke-pester`.
+The project uses Pester for testing. From a PowerShell command prompt, type: `invoke-pester`.
 
 ## Hives
 
@@ -104,9 +104,11 @@ The [Hives Yaml] hives.yaml contains a list of leaders who are responsible for 1
 The function [AssignUsersToTeam] Phoenix.ps1
 
 ## Coud subscriptions
-in the main run.ps1 the subscriptions are assigned a criticality level and grouped from production to development, use the Azure or AWS subscription ID in these specification
+in the main run.ps1, the subscriptions are assigned a criticality level and grouped from production to development, use the Azure or AWS subscription ID in this specification
 
-The association of assets to subdomains is done via rules and looking up the pipeline tag against each deployed cloud asset / for AWS those can be cloudformation ID
+The association of assets to subdomains is done via rules and looking up the pipeline tag against each deployed cloud asset / for AWS. Those can be cloud formation ID
+
+The cloud environment and application can be created using either tag (Phoenix security canary tags) or specific networks
 
 By grouping assets by subdomains (services) they can then be associated to the code that is using them.
 
