@@ -5,8 +5,8 @@ import time
 from multipledispatch import dispatch
 from providers.Utils import group_repos_by_subdomain, calculate_criticality
 
-APIdomain = "https://api.yourdomain.securityphoenix.cloud"
-DEBUG = True
+APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud" #change this with your specific domain
+DEBUG = False #debug settings to trigger debug output 
 
 def get_auth_token(clientID, clientSecret, retries=3):
     credentials = f"{clientID}:{clientSecret}".encode('utf-8')
@@ -151,71 +151,116 @@ def add_container_rule(image, subdomain, environment_name, access_token):
 
 def add_service_rule_batch(environment, service, headers):
     payload = None
-    if service['Association'] == 'Tag':
-        print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=Tag")
-    
-        tag_parts = service['Association_value'].split(':')
-        
-        payload = {
-            "selector": {
-                "applicationSelector": {
-                    "name": environment['Name'],
-                    "caseSensitive": False
-                },
-                "componentSelector": {
-                    "name": service['Service'],
-                    "caseSensitive": False
-                }
-            },
-            "rules": [
-                {
-                    "name": f"{tag_parts[0]} {tag_parts[1] if len(tag_parts) == 2 else ''}",
-                    "filter": {
-                        "tags": [{"key": tag_parts[0] if len(tag_parts) == 2 else '', "value": tag_parts[1] if len(tag_parts) == 2 else tag_parts[0]}]
-                    }
-                }
-        ]
-    }
-        
-    if service['Association'] == 'IP':
+
+    # Handle INFRA services with CIDR association (IP-based)
+    if service['Association'] == 'IP' and service['Type'] == 'Infra':
         print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=IP")
         
-        payload = {
-            "selector": {
-                "applicationSelector": {
-                    "name": environment['Name'],
-                    "caseSensitive": False
-                },
-                "componentSelector": {
-                    "name": service['Service'],
-                    "caseSensitive": False
-                }
-            },
-            "rules": [
-                {
-                    "name": f"IP association {service['Association_value']}",
-                    "filter": {
-                        "tags": [{"value": service['Association_value']}]
+        cidrs = [cidr.strip() for cidr in service['Association_value'].split(",") if cidr.strip()]
+        
+        if not cidrs:
+            print(f"Error: No valid CIDR values found for {service['Service']}.")
+            return
+        
+        for index, cidr in enumerate(cidrs, start=1):
+            # Ensure proper CIDR formatting
+            if '/' not in cidr:
+                finalCidr = f"{cidr}/32"  # Default to /32 if no CIDR mask provided
+            else:
+                finalCidr = cidr
+
+            payload = {
+                "selector": {
+                    "applicationSelector": {
+                        "name": environment['Name'],
+                        "caseSensitive": False
+                    },
+                    "componentSelector": {
+                        "name": service['Service'],
+                        "caseSensitive": False
                     }
-                }
-            ]
-        }
+                },
+                "rules": [
+                    {
+                        "name": f"CIDR rule for {service['Service']} - {index}",
+                        "filter": {
+                            "assetType": "INFRA",  # Should be a single string, not an array
+                            "cidr": finalCidr
+                        }
+                    }
+                ]
+            }
+            if DEBUG:
+                print(f"Payload being sent for CIDR {finalCidr}: {json.dumps(payload, indent=2)}")
 
+            # Send the request to add the rule
+            try:
+                api_url = construct_api_url("/v1/components/rules")
+                response = requests.post(api_url, headers=headers, json=payload)
+                response.raise_for_status()  # This will raise HTTPError for 4xx and 5xx responses
+                print(f"+ CIDR Rule {index} for {finalCidr} added to {service['Service']}.")
+            except requests.exceptions.HTTPError as e:
+                print(f"Error: {e}")
+                print(f"Response content: {response.content}")  # Log response content for debugging
+                if response.status_code == 400:
+                    print("Bad Request: Check if all required fields are provided and valid in the payload.")
+                elif response.status_code == 409:
+                    print(f" > CIDR Rule for {finalCidr} already exists.")
+                else:
+                    exit(1)
 
+    # Handle Tag-based association
+    elif service['Association'] == 'Tag':
+        tag_parts = service['Association_value'].split(':')
+        
+        if len(tag_parts) == 2 and tag_parts[0] and tag_parts[1]:
+            print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=Tag")
+            
+            payload = {
+                "selector": {
+                    "applicationSelector": {
+                        "name": environment['Name'],
+                        "caseSensitive": False
+                    },
+                    "componentSelector": {
+                        "name": service['Service'],
+                        "caseSensitive": False
+                    }
+                },
+                "rules": [
+                    {
+                        "name": f"Tag rule for {service['Service']}",
+                        "filter": {
+                            "tags": [{"key": tag_parts[0], "value": tag_parts[1]}]
+                        }
+                    }
+                ]
+            }
+        else:
+            print(f"Error: Invalid tag format for {service['Service']}. Expected 'key:value', got {service['Association_value']}")
+            return
+    
     if not payload:
+        print("No valid association type found, skipping rule creation.")
         return
     
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
     try:
         api_url = construct_api_url("/v1/components/rules")
+        print(f"Payload being sent to {api_url}: {json.dumps(payload, indent=2)}")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f"+ Service Rule added for {service}")
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Service Rule {service} already exists")
+        print(f"+ Service Rule added for {service['Service']}")
+    except requests.exceptions.HTTPError as e:
+        print(f"Error: {e}")
+        print(f"Response content: {response.content}")  # Log response content for debugging
+        if response.status_code == 400:
+            print("Bad Request: Check if all required fields are provided and valid in the payload.")
+        elif response.status_code == 409:
+            print(f" > Service Rule {service['Service']} already exists.")
         else:
-            print(f"Error: {e}")
-            print(response.content)
             exit(1)
 
 
@@ -238,7 +283,11 @@ def add_service_rule(environment, service, tag_name, tag_value, access_token):
                 "providerAccountId": environment['CloudAccounts']
             }
         }]
+        
     }
+    if DEBUG:
+            print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
 
 def create_applications(applications, application_environments, headers):
     print('[Applications]')
@@ -255,6 +304,9 @@ def create_application(app, headers):
         "tags": [{"key": "pteam", "value": app['TeamName']}],
         "owner": {"email": app['Responsable']}
     }
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
 
     try:
         api_url = construct_api_url("/v1/applications")
@@ -274,45 +326,45 @@ def create_application(app, headers):
         create_custom_finding_rule(app, component, headers)
 
 def create_custom_component(applicationName, component, headers):
-    # Start creating the payload
+    # Ensure valid tag values by filtering out empty or None values
+    tags = [
+        {"key": "pteam", "value": component['TeamName']},
+        {"key": "Status", "value": component['Status']},
+        {"key": "Type", "value": component['Type']}
+    ]
+
+    # Add domain and subdomain tags only if they are not None or empty
+    if component.get('Domain'):
+        tags.append({"key": "domain", "value": component['Domain']})
+    if component.get('SubDomain'):
+        tags.append({"key": "subdomain", "value": component['SubDomain']})
+
     payload = {
         "applicationSelector": {
             "name": applicationName
         },
         "name": component['ComponentName'],
-        "criticality": component.get('Criticality', 5),  # Default criticality if missing
-        "tags": [
-            {"key": "pteam", "value": component['TeamName']},
-            {"key": "Status", "value": component['Status']},
-            {"key": "Type", "value": component['Type']}
-        ]
+        "criticality": component.get('Criticality', 5),  # Default to criticality 5
+        "tags": tags
     }
 
-    # Only add 'domain' and 'subdomain' if they have non-null values
-    if component.get('Domain'):
-        payload['tags'].append({"key": "domain", "value": component['Domain']})
-    
-    if component.get('SubDomain'):
-        payload['tags'].append({"key": "subdomain", "value": component['SubDomain']})
-
     if DEBUG:
-        print(f"Payload being sent to /v1/components: {json.dumps(payload, indent=2)}")  # Print payload
+        print(f"Payload being sent to /v1/components: {json.dumps(payload, indent=2)}")
 
     api_url = construct_api_url("/v1/components")
 
     try:
-        # POST request to add the custom component
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         print(f"{component['ComponentName']} component added.")
         time.sleep(2)
-
-    except requests.exceptions.HTTPError as e:
-        print(f"Error adding component {component['ComponentName']} for application {applicationName}: {e}")
-        print(f"Response content: {response.content}")  # Print the response content for details
-        if response.status_code == 400:
-            print(f"Bad Request: Check if all required fields are provided and valid in the payload.")
-        exit(1)
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > Component {component['ComponentName']} already exists")
+        else:
+            print(f"Error: {e}")
+            print(f"Response content: {response.content}")
+            exit(1)
 
     # Ensure RepositoryName is not None and is iterable
     repository_names = component.get('RepositoryName', [])
@@ -383,6 +435,9 @@ def create_custom_finding_rule(application, component, headers):
             }
         ]
     }
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
 
     api_url = construct_api_url("/v1/components/rules")
 
@@ -442,6 +497,9 @@ def create_repo(repo, access_token):
             ]
         }
     }
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
 
     api_url = construct_api_url("/v1/applications/repository")
 
@@ -500,6 +558,8 @@ def cloud_asset_rule(name, search_term, environment_name, access_token):
     }
 
     api_url = construct_api_url("/v1/components/rules")
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
 
     try:
         # Make POST request to add the cloud asset rule
@@ -547,7 +607,9 @@ def create_teams(teams, pteams, access_token):
             }
 
             api_url = construct_api_url("/v1/teams")
-            
+            if DEBUG:
+                print(f"Payload being sent to /v1teams: {json.dumps(payload, indent=2)}")
+
             try:
                 # Make the POST request to add the team
                 response = requests.post(api_url, headers=headers, json=payload)
@@ -900,7 +962,7 @@ def get_tag_value(tag_name, source_tags, expected_value):
                 except Exception as e:
                     print(f"Error removing tag for {tag_name}: {e}")
 
-def remove_tag(tag_id, tag_key, tag_value):
+def remove_tag(tag_id, tag_key, tag_value,access_token):
     """
     Removes the specified tag by making a DELETE or PATCH API call.
 
@@ -920,6 +982,8 @@ def remove_tag(tag_id, tag_key, tag_value):
             }
         ]
     }
+    if DEBUG:
+        print(f"Payload being sent to /v1-component-tags: {json.dumps(payload, indent=2)}")
 
     api_url = construct_api_url("/v1/components/tags")
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
@@ -1003,6 +1067,9 @@ def add_service(applicationSelectorName, service, tier, headers):
         },
         "tags": []  # No team tag since it's missing
     }
+
+    if DEBUG:
+            print(f"Payload being sent to /v1components: {json.dumps(payload, indent=2)}")
 
     api_url = construct_api_url("/v1/components")
     response = requests.post(api_url, headers=headers, json=payload)
