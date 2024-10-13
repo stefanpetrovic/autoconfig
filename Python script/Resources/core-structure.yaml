@@ -1,67 +1,70 @@
 # yaml-language-server: $schema=BankingCore.schema.json
-AllAccessAccounts: # Not mandatory list of all access account emails
+AllAccessAccounts: # Not mandatory - list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - AppName: SP8_TestApp1
-    Status: NotStarted
-    TeamName: limaSP5
+  - AppName: TST_TestApp1 #name of the application
+    Status: NotStarted #Status tags optionals (get added as tags)
+    TeamName: FC_lima #name of the ateam responsable, can be a team responsible for the whole app or a specific component , this create pteam tags
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
     ReleaseDefinitions: []
-    Responsable: frankadm@admin.com
-    Tier: 2 #importance from 1-10
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 2 #importance from 1-10 higher -> more critical , 5 default = neutral
     Components:
-      - ComponentName: SP8_product1-repo1
-        Status: Production
-        Type: Release
-        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
-        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
+      - ComponentName: product1-repo1 #name of the component 
+        Status: Production #Tag Optional
+        Type: Release #Tag Optional
+        TeamName: FC_axelot #name of the team as it appears in hives and teams 
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
-        AutomaticSecurityReview: false
-      - ComponentName: SP8_product1repo2
+        AutomaticSecurityReview: false #optional
+      - ComponentName: product1repo2
         Status: Production
         Type: Release
-        TeamName: limaSP5
+        TeamName: FC_lima
         RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
-  - AppName: SP8_CoreApp2
+  - AppName: FR_CoreApp2
     Status: NotStarted
-    TeamName: limaSP5
+    TeamName: FC_lima
     ReleaseDefinitions: []
-    Responsable: frankadm@admin.com
-    Tier: 7 #importance from 1-10
+    Responsable: TST_limaankadm@admin.com
+    Tier: 7 #importance TST_limaom 1-10
     Components:
-      - ComponentName: SP8_coreapp2_rule1-repo
+      - ComponentName: coreapp2_rule1-repo
         Status: Production
         Type: Release
-        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
+        TeamName: FC_axelot #name of the team as it appears in hives and teams 
         RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
-        Tier: 3 #importance from 1-10
+        Tier: 3 #importance TST_limaom 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
         AutomaticSecurityReview: false
-      - ComponentName: SP8_coreapp2_rule2-repo
+      - ComponentName: coreapp2_rule2-repo
         Status: Production
         Type: Release
-        TeamName: limaSP5
+        TeamName: FC_lima
         RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
   #name of the repo as appears in phoenix
-        Tier: 2 #importance from 1-10
+        Tier: 2 #importance TST_limaom 1-10
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
         AutomaticSecurityReview: false
-  - AppName: SP8_App3
+  - AppName: TST_lima_App3
     Status: NotStarted
-    TeamName: limaSP5
+    TeamName: FC_lima
     ReleaseDefinitions: []
-    Responsable: frankadm@admin.com
-    Tier: 2 #importance from 1-10
+    Responsable: TST_limaankadm@admin.com
+    Tier: 2 #importance TST_limaom 1-10
     Components:
-      - ComponentName: SP8_product3-prod
-        Status: Production
-        Type: Release
-        TeamName: limaSP5
+      - ComponentName: product3-prod #name of the component 
+        Status: Production #optional tag
+        Type: Release #optional tag
+        #can be one or more than one rules to associate an application to a repo
+        TeamName: FC_lima 
         RepositoryName:
-          - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
+          - Phoenix-ent-demo/Damn-Vulnerable-Source-Code 
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
           - Phoenix-ent-demo/vulnado
   #name of the repo as appears in phoenix
@@ -69,11 +72,10 @@ DeploymentGroups:
         Domain: App13
         SubDomain: Prod
         AutomaticSecurityReview: false
-
-      - ComponentName: SP8_product23-dev
+      - ComponentName: product23-dev
         Status: Production
         Type: Release
-        TeamName: limaSP5
+        TeamName: FC_lima
         RepositoryName:
           - Security-Phoenix-demo/WebGoat-Legacy
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
@@ -82,63 +84,81 @@ DeploymentGroups:
         Domain: App123456
         SubDomain: Dev
 Environment Groups:
-  - Name: SP8_Production
+  - Name: TST_Production
     Type: CLOUD
     Status: Production
-    Responsable: frankadm@admin.com
+    Responsable: TS_limaankadm@admin.com
     Tier: 2 #importance from 1-10
-    TeamName: limaSP5 #name of the team as it appears in hives and teams 
+    TeamName: FC_lima #name of the team as it appears in hives and teams 
     Status: Production
     Tag: 
     Team:
     Services:
-      - Service: SP8_ProdGRP1
+      - Service: ProdGRP1
         Type: Cloud
         Association: Tag
-        Association_value: issue-test-asset2
+        Association_value: issue-test-asset3
         Tier: 2 #importance from 1-10
-        TeamName: limaSP5 #name of the team as it appears in hives and teams 
-      - Service: SP8_ProdGRP2
+        TeamName: FC_lima #name of the team as it appears in hives and teams 
+      - Service: ProdGRP2
         Type: Container
         Association: Tag
         Association_value: asset.type:workload
         Tier: 2 #importance from 1-10
-        TeamName: limaSP8_ #name of the team as it appears in hives and teams  
-  - Name: SP8__Dev
+        TeamName: FC_lima #name of the team as it appears in hives and teams  
+  - Name: FR_Dev
     Type: CLOUD
     Status: Production
     Responsable: frankadm@admin.com
     Tier: 5
     Tag: dev
     Services:
-      - Service: SP8_DevGRP1
-        Type: Cloud
-        Association: Tag
-        Association_value: issue-test-asset2
-        TeamName: limaSP5 #name of the team as it appears in hives and teams 
-      - Service: SP8_DevGRP2
+      - Service: DevGRP1
+        Type: Cloud #Type of asset
+        Association: Tag #Type of association /rule
+        Association_value: issue-test-asset3 #Value
+        TeamName: FC_lima #name of the team as it appears in hives and teams 
+      - Service: DevGRP2
         Type: Cloud
         Association: Tag
         Association_value: asset.type:workload 
-        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
+        TeamName: FC_axelot #name of the team as it appears in hives and teams 
 
-  - Name: SP8_Infra
+  - Name: TST_Infra
     Type: INFRA
     Tier: 2 #importance from 1-10
-    Responsable: frankadm@admin.com
-    TeamName: axelotSP5 #name of the team as it appears in hives and teams 
+    Responsable: admin@admin.com
+    TeamName: FC_axelot #name of the team as it appears in hives and teams 
     Status: Production
     Tag: infra
     Services:
-    - Service: SP8_InfraGRP1
+    - Service: InfraGRP1
       Type: Infra
       Association: IP
-      Association_value: 10.1.1.0/24
+      Association_value: 10.1.1.0/24 #can be a /xx cidr
       Tier: 2 #importance from 1-10
-      TeamName: axelotSP5 #name of the team as it appears in hives and teams 
-    - Service: SP8_InfraGRP2
+      TeamName: FC_axelot #name of the team as it appears in hives and teams 
+    - Service: External Services
+      Type: Infra
+      Association: IP
+      Association_value: 109.113.0.0/16
+      Tier: 2 #importance from 1-10
+      TeamName: FC_axelot #name of the team as it appears in hives and teams 
+    - Service: External Services2
+      Type: Infra
+      Association: IP
+      Association_value: 31.157.0.0/16, 31.158.0.0/16 #can be more than one network per rule
+      Tier: 2 #importance from 1-10
+      TeamName: FC_lima #name of the team as it appears in hives and teams 
+    - Service: Printers
+      Type: Infra
+      Association: IP
+      Association_value: 100.83.190.226, 169.254.250.250 #if not spefified is a /32 
+      Tier: 2 #importance from 1-10
+      TeamName: FC_lima #name of the team as it appears in hives and teams 
+    - Service: InfraGRP2
       Type: Infra
       Association: IP
       Association_value: 10.2.2.0/24
       Tier: 2 #importance from 1-10
-      TeamName: limaSP5 #name of the team as it appears in hives and teams 
+      TeamName: FC_lima #name of the team as it appears in hives and teams 
