@@ -34,36 +34,36 @@ def get_auth_token(clientID, clientSecret, retries=3):
 def construct_api_url(endpoint):
     return f"{APIdomain}{endpoint}"
 
-def create_environment(name, criticality, env_type, owner, status, team_name, headers):
+def create_environment(environment, headers):
     print("[Environment]")
 
     payload = {
-        "name": name,
+        "name": environment['Name'],
         "type": "ENVIRONMENT",
-        "subType": env_type,
-        "criticality": criticality,
+        "subType": environment['Type'],
+        "criticality": environment['Criticality'],
         "owner": {
-            "email": owner
+            "email": environment['Responsable']
         },
         "tags": []
     }
 
     # Add status tag
-    if status:
-        payload["tags"].append({"key": "status", "value": status})
+    if environment['Status']:
+        payload["tags"].append({"key": "status", "value": environment['Status']})
 
     # Add team_name tag only if it's provided
-    if team_name:
-        payload["tags"].append({"key": "pteam", "value": team_name})
+    if environment['TeamName']:
+        payload["tags"].append({"key": "pteam", "value": environment['TeamName']})
     else:
-        print(f"Warning: No team_name provided for environment {name}. Skipping pteam tag.")
+        print(f"Warning: No team_name provided for environment {environment['Name']}. Skipping pteam tag.")
 
     try:
         api_url = construct_api_url("/v1/applications")
         print(f"Payload for environment creation: {json.dumps(payload, indent=2)}")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f" + Environment added: {name}")
+        print(f" + Environment added: {environment['Name']}")
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
         print(f'Response content: {response.content}')
@@ -155,11 +155,6 @@ def add_service_rule_batch(environment, service, headers):
         print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=Tag")
     
         tag_parts = service['Association_value'].split(':')
-        print(tag_parts)
-        print(len(tag_parts))
-        # if not (len(tag_parts)) == 2:
-        #     print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
-        #     return
         
         payload = {
             "selector": {
@@ -175,13 +170,37 @@ def add_service_rule_batch(environment, service, headers):
             "rules": [
                 {
                     "name": f"{tag_parts[0]} {tag_parts[1] if len(tag_parts) == 2 else ''}",
-
                     "filter": {
                         "tags": [{"key": tag_parts[0] if len(tag_parts) == 2 else '', "value": tag_parts[1] if len(tag_parts) == 2 else tag_parts[0]}]
                     }
                 }
         ]
     }
+        
+    if service['Association'] == 'IP':
+        print(f"Adding Service Rule {service['Service']} to {environment['Name']}, with Association=IP")
+        
+        payload = {
+            "selector": {
+                "applicationSelector": {
+                    "name": environment['Name'],
+                    "caseSensitive": False
+                },
+                "componentSelector": {
+                    "name": service['Service'],
+                    "caseSensitive": False
+                }
+            },
+            "rules": [
+                {
+                    "name": f"IP association {service['Association_value']}",
+                    "filter": {
+                        "tags": [{"value": service['Association_value']}]
+                    }
+                }
+            ]
+        }
+
 
     if not payload:
         return
@@ -196,6 +215,7 @@ def add_service_rule_batch(environment, service, headers):
             print(f" > Service Rule {service} already exists")
         else:
             print(f"Error: {e}")
+            print(response.content)
             exit(1)
 
 
@@ -306,35 +326,32 @@ def create_custom_component(applicationName, component, headers):
 
 # Handle Repository Rule Creation for Components
 def create_repository_rule(applicationName, componentName, repositoryName, headers):
-    repository_names = [repositoryName] if isinstance(repositoryName, str) else repositoryName
+    payload = {
+        "selector": {
+            "applicationSelector": {"name": applicationName, "caseSensitive": False},
+            "componentSelector": {"name": componentName, "caseSensitive": False}
+        },
+        "rules": [{
+            "name": f"Repository rule for {repositoryName}",
+            "filter": {"repository": [repositoryName]}
+        }]
+    }
 
-    for repo in repository_names:
-        payload = {
-            "selector": {
-                "applicationSelector": {"name": applicationName, "caseSensitive": False},
-                "componentSelector": {"name": componentName, "caseSensitive": False}
-            },
-            "rules": [{
-                "name": f"Repository rule for {repo}",
-                "filter": {"repository": [repo]}
-            }]
-        }
+    if DEBUG:
+        print(f"Payload for {componentName}: {json.dumps(payload, indent=2)}")
 
-        if DEBUG:
-            print(f"Payload for {componentName}: {json.dumps(payload, indent=2)}")
-
-        try:
-            api_url = construct_api_url("/v1/components/rules")
-            response = requests.post(api_url, headers=headers, json=payload)
-            response.raise_for_status()
-            print(f"Rule for {repo} created.")
-        except requests.exceptions.RequestException as e:
-            if response.status_code == 409:
-                print(f" > Rule for {repo} already exists.")
-            else:
-                print(f"Error: {e}")
-                print(f"Response content: {response.content}")
-                exit(1)
+    try:
+        api_url = construct_api_url("/v1/components/rules")
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f"Rule for {repositoryName} created.")
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > Rule for {repositoryName} already exists.")
+        else:
+            print(f"Error: {e}")
+            print(f"Response content: {response.content}")
+            exit(1)
 
 
 def create_custom_finding_rule(application, component, headers):
@@ -625,17 +642,32 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
         ]
     }
 
-    api_url = f"https://api.demo.appsecphx.io/v1/teams/{team_id}/components/auto-link/tags"
+    api_url = construct_api_url(f"/v1/teams/{team_id}/components/auto-link/tags")
     
     try:
         # Make the POST request to create the team rule
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f" + {tag_name} rule added for: {tag_value}")
+        print(f" + {tag_name} Component rule added for: {tag_value}")
     
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > {tag_name} Rule {tag_value} already exists")
+            print(f" > {tag_name} Component Rule {tag_value} already exists")
+        else:
+            print(f"Error: {e}")
+            exit(1)
+
+    api_url = construct_api_url(f"/v1/teams/{team_id}/applications/auto-link/tags")
+    
+    try:
+        # Make the POST request to create the team rule
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f" + {tag_name} App/Env rule added for: {tag_value}")
+    
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > {tag_name} App/Env Rule {tag_value} already exists")
         else:
             print(f"Error: {e}")
             exit(1)
