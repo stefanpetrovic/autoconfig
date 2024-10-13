@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=BankingCore.schema.json
 AllAccessAccounts: # Not mandatory list of all access account emails
- - ciso@company.com
+  - ciso@company.com
 DeploymentGroups:
   - AppName: FR_TestApp1
     Status: NotStarted
@@ -60,6 +60,7 @@ DeploymentGroups:
         Status: Production
         Type: Release
         TeamName: FC_lima
+        RepositoryName:
           - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
           - Phoenix-ent-demo/vulnado
@@ -120,7 +121,6 @@ Environment Groups:
         Association: Tag
         Association_value: asset.type:workload 
         TeamName: FC_axelot #name of the team as it appears in hives and teams 
-
   - Name: FR_Infra
     Type: INFRA
     Tier: 2 #importance from 1-10

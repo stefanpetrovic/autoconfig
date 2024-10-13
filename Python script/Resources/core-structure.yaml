@@ -63,6 +63,7 @@ DeploymentGroups:
         Type: Release #optional tag
         #can be one or more than one rules to associate an application to a repo
         TeamName: FC_lima 
+        RepositoryName:
           - Phoenix-ent-demo/Damn-Vulnerable-Source-Code 
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
           - Phoenix-ent-demo/vulnado
