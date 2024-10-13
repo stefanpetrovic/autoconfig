@@ -2,64 +2,64 @@
 AllAccessAccounts: # Not mandatory list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - AppName: SP6_TestApp1
+  - AppName: SP8_TestApp1
     Status: NotStarted
-    TeamName: limaSP3
+    TeamName: limaSP5
     ReleaseDefinitions: []
     Responsable: frankadm@admin.com
     Tier: 2 #importance from 1-10
     Components:
-      - ComponentName: SP6_product1-repo1
+      - ComponentName: SP8_product1-repo1
         Status: Production
         Type: Release
-        TeamName: axelotSP3 #name of the team as it appears in hives and teams 
+        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
         RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
         AutomaticSecurityReview: false
-      - ComponentName: SP6_product1repo2
+      - ComponentName: SP8_product1repo2
         Status: Production
         Type: Release
-        TeamName: limaSP3
+        TeamName: limaSP5
         RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
-  - AppName: SP6_CoreApp2
+  - AppName: SP8_CoreApp2
     Status: NotStarted
-    TeamName: limaSP3
+    TeamName: limaSP5
     ReleaseDefinitions: []
     Responsable: frankadm@admin.com
     Tier: 7 #importance from 1-10
     Components:
-      - ComponentName: SP6_coreapp2_rule1-repo
+      - ComponentName: SP8_coreapp2_rule1-repo
         Status: Production
         Type: Release
-        TeamName: axelotSP3 #name of the team as it appears in hives and teams 
+        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
         RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
         AutomaticSecurityReview: false
-      - ComponentName: SP6_coreapp2_rule2-repo
+      - ComponentName: SP8_coreapp2_rule2-repo
         Status: Production
         Type: Release
-        TeamName: limaSP3
+        TeamName: limaSP5
         RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
   #name of the repo as appears in phoenix
         Tier: 2 #importance from 1-10
         Domain: Client Servicing
         SubDomain: Customer Relationship Management
         AutomaticSecurityReview: false
-  - AppName: SP6_App3
+  - AppName: SP8_App3
     Status: NotStarted
-    TeamName: limaSP3
+    TeamName: limaSP5
     ReleaseDefinitions: []
     Responsable: frankadm@admin.com
     Tier: 2 #importance from 1-10
     Components:
-      - ComponentName: SP6_product3-prod
+      - ComponentName: SP8_product3-prod
         Status: Production
         Type: Release
-        TeamName: limaSP3
+        TeamName: limaSP5
         RepositoryName:
           - Phoenix-ent-demo/Damn-Vulnerable-Source-Code
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
@@ -70,10 +70,10 @@ DeploymentGroups:
         SubDomain: Prod
         AutomaticSecurityReview: false
 
-      - ComponentName: SP6_product23-dev
+      - ComponentName: SP8_product23-dev
         Status: Production
         Type: Release
-        TeamName: limaSP3
+        TeamName: limaSP5
         RepositoryName:
           - Security-Phoenix-demo/WebGoat-Legacy
           - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
@@ -82,63 +82,63 @@ DeploymentGroups:
         Domain: App123456
         SubDomain: Dev
 Environment Groups:
-  - Name: SP6_Production
+  - Name: SP8_Production
     Type: CLOUD
     Status: Production
     Responsable: frankadm@admin.com
     Tier: 2 #importance from 1-10
-    TeamName: limaSP3 #name of the team as it appears in hives and teams 
+    TeamName: limaSP5 #name of the team as it appears in hives and teams 
     Status: Production
     Tag: 
     Team:
     Services:
-      - Service: SP6_ProdGRP1
+      - Service: SP8_ProdGRP1
         Type: Cloud
         Association: Tag
         Association_value: issue-test-asset2
         Tier: 2 #importance from 1-10
-        TeamName: limaSP3 #name of the team as it appears in hives and teams 
-      - Service: SP6_ProdGRP2
+        TeamName: limaSP5 #name of the team as it appears in hives and teams 
+      - Service: SP8_ProdGRP2
         Type: Container
         Association: Tag
         Association_value: asset.type:workload
         Tier: 2 #importance from 1-10
-        TeamName: limaSP6_ #name of the team as it appears in hives and teams  
-  - Name: SP6__Dev
+        TeamName: limaSP8_ #name of the team as it appears in hives and teams  
+  - Name: SP8__Dev
     Type: CLOUD
     Status: Production
     Responsable: frankadm@admin.com
     Tier: 5
     Tag: dev
     Services:
-      - Service: SP6_DevGRP1
+      - Service: SP8_DevGRP1
         Type: Cloud
         Association: Tag
         Association_value: issue-test-asset2
-        TeamName: limaSP3 #name of the team as it appears in hives and teams 
-      - Service: SP6_DevGRP2
+        TeamName: limaSP5 #name of the team as it appears in hives and teams 
+      - Service: SP8_DevGRP2
         Type: Cloud
         Association: Tag
         Association_value: asset.type:workload 
-        TeamName: axelotSP3 #name of the team as it appears in hives and teams 
+        TeamName: axelotSP5 #name of the team as it appears in hives and teams 
 
-  - Name: SP6_Infra
+  - Name: SP8_Infra
     Type: INFRA
     Tier: 2 #importance from 1-10
     Responsable: frankadm@admin.com
-    TeamName: axelotSP3 #name of the team as it appears in hives and teams 
+    TeamName: axelotSP5 #name of the team as it appears in hives and teams 
     Status: Production
     Tag: infra
     Services:
-    - Service: SP6_InfraGRP1
+    - Service: SP8_InfraGRP1
       Type: Infra
       Association: IP
       Association_value: 10.1.1.0/24
       Tier: 2 #importance from 1-10
-      TeamName: axelotSP3 #name of the team as it appears in hives and teams 
-    - Service: SP6_InfraGRP2
+      TeamName: axelotSP5 #name of the team as it appears in hives and teams 
+    - Service: SP8_InfraGRP2
       Type: Infra
       Association: IP
       Association_value: 10.2.2.0/24
       Tier: 2 #importance from 1-10
-      TeamName: limaSP3 #name of the team as it appears in hives and teams 
+      TeamName: limaSP5 #name of the team as it appears in hives and teams 
