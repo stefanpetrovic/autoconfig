@@ -271,7 +271,7 @@ def create_application(app, headers):
     
     for component in app['Components']:
         create_custom_component(app['AppName'], component, headers)
-        create_custom_finding_rule(app, component, headers)
+        #create_custom_finding_rule(app, component, headers)
 
 def create_custom_component(applicationName, component, headers):
     # Start creating the payload
@@ -325,6 +325,7 @@ def create_custom_component(applicationName, component, headers):
         create_repository_rule(applicationName, component['ComponentName'], repo_name, headers)
 
 # Handle Repository Rule Creation for Components
+# TODO Investigate Create Rule for Repo 1
 def create_repository_rule(applicationName, componentName, repositoryName, headers):
     payload = {
         "selector": {
@@ -353,55 +354,54 @@ def create_repository_rule(applicationName, componentName, repositoryName, heade
             print(f"Response content: {response.content}")
             exit(1)
 
-
-def create_custom_finding_rule(application, component, headers):
+# def create_custom_finding_rule(application, component, headers):
     
-    # Create the payload
-    payload = {
-        "selector": {
-            "applicationSelector": {
-                "name": application['AppName'],
-                "caseSensitive": False
-            },
-            "componentSelector": {
-                "name": component['ComponentName'],
-                "caseSensitive": False
-            }
-        },
-        "rules": [
-            {
-                "name": f"{application['AppName']} {component['ComponentName']}",
-                "filter": {
-                    "tags": [
-                        {
-                            "key": "subdomain",
-                            "value": application['AppName']
-                        }
-                    ],
-                    "repository": get_repositories_from_component(component)
-                }
-            }
-        ]
-    }
+#     # Create the payload
+#     payload = {
+#         "selector": {
+#             "applicationSelector": {
+#                 "name": application['AppName'],
+#                 "caseSensitive": False
+#             },
+#             "componentSelector": {
+#                 "name": component['ComponentName'],
+#                 "caseSensitive": False
+#             }
+#         },
+#         "rules": [
+#             {
+#                 "name": f"{application['AppName']} {component['ComponentName']}",
+#                 "filter": {
+#                     "tags": [
+#                         {
+#                             "key": "subdomain",
+#                             "value": application['AppName']
+#                         }
+#                     ],
+#                     "repository": get_repositories_from_component(component)
+#                 }
+#             }
+#         ]
+#     }
 
-    api_url = construct_api_url("/v1/components/rules")
+#     api_url = construct_api_url("/v1/components/rules")
 
-    try:
-        # Make POST request to add the custom finding rule
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()
-        print(f"{component['ComponentName']} rule added.")
+#     try:
+#         # Make POST request to add the custom finding rule
+#         response = requests.post(api_url, headers=headers, json=payload)
+#         response.raise_for_status()
+#         print(f"{component['ComponentName']} rule added.")
         
-        # Sleep for 2 seconds
-        time.sleep(2)
+#         # Sleep for 2 seconds
+#         time.sleep(2)
         
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Custom Component {component['ComponentName']} already exists")
-        else:
-            print(f"Error: {e}")
-            print(f'Error message {response.content}')
-            exit(1)
+#     except requests.exceptions.RequestException as e:
+#         if response.status_code == 409:
+#             print(f" > Custom Component {component['ComponentName']} already exists")
+#         else:
+#             print(f"Error: {e}")
+#             print(f'Error message {response.content}')
+#             exit(1)
 
 def get_repositories_from_component(component):
     if not component['RepositoryName']:
