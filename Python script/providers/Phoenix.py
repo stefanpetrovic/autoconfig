@@ -5,7 +5,8 @@ import time
 from multipledispatch import dispatch
 from providers.Utils import group_repos_by_subdomain, calculate_criticality
 
-APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud"
+APIdomain = "https://api.yourdomain.securityphoenix.cloud"
+DEBUG = True
 
 def get_auth_token(clientID, clientSecret, retries=3):
     credentials = f"{clientID}:{clientSecret}".encode('utf-8')
@@ -44,30 +45,31 @@ def create_environment(name, criticality, env_type, owner, status, team_name, he
         "owner": {
             "email": owner
         },
-        "tags": [
-            {
-                "value": status
-            },
-            {
-                "key": "pteam",
-                "value": team_name
-            }
-        ]
+        "tags": []
     }
+
+    # Add status tag
+    if status:
+        payload["tags"].append({"key": "status", "value": status})
+
+    # Add team_name tag only if it's provided
+    if team_name:
+        payload["tags"].append({"key": "pteam", "value": team_name})
+    else:
+        print(f"Warning: No team_name provided for environment {name}. Skipping pteam tag.")
 
     try:
         api_url = construct_api_url("/v1/applications")
+        print(f"Payload for environment creation: {json.dumps(payload, indent=2)}")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         print(f" + Environment added: {name}")
     except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(" > Environment already exists")
-        else:
-            print(f"Error: {e}")
-            print(f'Error message: {response.content}')
-            exit(1)
+        print(f"Error: {e}")
+        print(f'Response content: {response.content}')
+        raise
 
+# Function to add services and process rules for the environment
 def add_environment_services(repos, subdomains, environments, application_environments, phoenix_components, subdomain_owners, teams, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
 
@@ -77,14 +79,22 @@ def add_environment_services(repos, subdomains, environments, application_enviro
 
         print(f"[Services] for {env_name}")
 
-        if environment['Team']:
-            for service in environment['Team']:
+        if environment['Services']:  # Updated key to Services
+            for service in environment['Services']:
+                team_name = service.get('TeamName', None)
+                
+                if not team_name:
+                    print(f"Warning: Service {service['Service']} has no TeamName, skipping service.")
+                    continue
+
                 if not environment_service_exist(env_id, phoenix_components, service['Service']):
-                    add_service(environment['Name'], service['Service'], service['Tier'], service['TeamName'], headers)
+                    try:
+                        add_service(env_name, service['Service'], service['Tier'], team_name, headers)
+                    except NotImplementedError as e:
+                        print(f"Error adding service {service['Service']} for environment {env_name}: {e}")
                 
                 add_service_rule_batch(environment, service, headers)
-
-
+                
             #if not environment_service_exist(env_id, phoenix_components, "Databricks"):
             #    add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
 
@@ -150,6 +160,11 @@ def add_service_rule_batch(environment, service, headers):
         # if not (len(tag_parts)) == 2:
         #     print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
         #     return
+        print(tag_parts)
+        print(len(tag_parts))
+        # if not (len(tag_parts)) == 2:
+        #     print(f"Cannot add service rule, Association_value not in valid format, needs to be like 'tag_key:tag_value', but it's {service['Association_value']} ")
+        #     return
         
         payload = {
             "selector": {
@@ -166,6 +181,7 @@ def add_service_rule_batch(environment, service, headers):
                 {
                     "name": f"{tag_parts[0]} {tag_parts[1] if len(tag_parts) == 2 else ''}",
                     "filter": {
+                        "tags": [{"key": tag_parts[0] if len(tag_parts) == 2 else '', "value": tag_parts[1] if len(tag_parts) == 2 else tag_parts[0]}]
                         "tags": [{"key": tag_parts[0] if len(tag_parts) == 2 else '', "value": tag_parts[1] if len(tag_parts) == 2 else tag_parts[0]}]
                     }
                 }
@@ -203,7 +219,7 @@ def add_service_rule(environment, service, tag_name, tag_value, access_token):
         "rules": [{
             "name": f"{tag_name} {tag_value}",
             "filter": {
-                "tags": [{"key": tag_name, "value": tag_value}],
+                "tags": [{"key":tag_name, "value":tag_value}],
                 "providerAccountId": environment['CloudAccounts']
             }
         }]
@@ -242,49 +258,89 @@ def create_application(app, headers):
         create_custom_component(app['AppName'], component, headers)
         create_custom_finding_rule(app, component, headers)
 
-
 def create_custom_component(applicationName, component, headers):
-    # Payload creation
+    # Start creating the payload
     payload = {
         "applicationSelector": {
             "name": applicationName
         },
         "name": component['ComponentName'],
-        "criticality": component['Criticality'],
+        "criticality": component.get('Criticality', 5),  # Default criticality if missing
         "tags": [
-            {
-                "key": "pteam",
-                "value": component['TeamName']
-            },
-            {
-                "key": "Status",
-                "value": component['Status']
-            },
-            {
-                "key": "Type",
-                "value": component['Type']
-            }
+            {"key": "pteam", "value": component['TeamName']},
+            {"key": "Status", "value": component['Status']},
+            {"key": "Type", "value": component['Type']}
         ]
     }
+
+    # Only add 'domain' and 'subdomain' if they have non-null values
+    if component.get('Domain'):
+        payload['tags'].append({"key": "domain", "value": component['Domain']})
     
-    # Convert the payload to JSON
+    if component.get('SubDomain'):
+        payload['tags'].append({"key": "subdomain", "value": component['SubDomain']})
+
+    if DEBUG:
+        print(f"Payload being sent to /v1/components: {json.dumps(payload, indent=2)}")  # Print payload
+
     api_url = construct_api_url("/v1/components")
-    
+
     try:
-        # Making the POST request to add the custom component
+        # POST request to add the custom component
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         print(f"{component['ComponentName']} component added.")
-        
-        # Sleep for 2 seconds (equivalent to Start-Sleep -Seconds 2 in PowerShell)
         time.sleep(2)
-        
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Component {component['ComponentName']} already exists")
-        else:
-            print(f"Error: {e}")
-            exit(1)
+
+    except requests.exceptions.HTTPError as e:
+        print(f"Error adding component {component['ComponentName']} for application {applicationName}: {e}")
+        print(f"Response content: {response.content}")  # Print the response content for details
+        if response.status_code == 400:
+            print(f"Bad Request: Check if all required fields are provided and valid in the payload.")
+        exit(1)
+
+    # Ensure RepositoryName is not None and is iterable
+    repository_names = component.get('RepositoryName', [])
+    
+    # If RepositoryName is not a list but a string, convert it to a list
+    if isinstance(repository_names, str):
+        repository_names = [repository_names]
+
+    for repo_name in repository_names:
+        create_repository_rule(applicationName, component['ComponentName'], repo_name, headers)
+
+# Handle Repository Rule Creation for Components
+def create_repository_rule(applicationName, componentName, repositoryName, headers):
+    repository_names = [repositoryName] if isinstance(repositoryName, str) else repositoryName
+
+    for repo in repository_names:
+        payload = {
+            "selector": {
+                "applicationSelector": {"name": applicationName, "caseSensitive": False},
+                "componentSelector": {"name": componentName, "caseSensitive": False}
+            },
+            "rules": [{
+                "name": f"Repository rule for {repo}",
+                "filter": {"repository": [repo]}
+            }]
+        }
+
+        if DEBUG:
+            print(f"Payload for {componentName}: {json.dumps(payload, indent=2)}")
+
+        try:
+            api_url = construct_api_url("/v1/components/rules")
+            response = requests.post(api_url, headers=headers, json=payload)
+            response.raise_for_status()
+            print(f"Rule for {repo} created.")
+        except requests.exceptions.RequestException as e:
+            if response.status_code == 409:
+                print(f" > Rule for {repo} already exists.")
+            else:
+                print(f"Error: {e}")
+                print(f"Response content: {response.content}")
+                exit(1)
+
 
 def create_custom_finding_rule(application, component, headers):
     
@@ -457,6 +513,7 @@ def create_teams(teams, pteams, access_token):
     """
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
     new_pteams = []
+    
     # Iterate over the list of teams to be added
     for team in teams:
         found = False
@@ -522,6 +579,7 @@ def populate_phoenix_teams(access_token):
         print(f"Error: {e}")
         exit(1)
 
+
 # CreateTeamRules Function
 def create_team_rules(teams, pteams, access_token):
     """
@@ -549,7 +607,6 @@ def create_team_rules(teams, pteams, access_token):
             print(f"Team: {team['TeamName']}")
             create_team_rule("pteam", team['TeamName'], team['id'], access_token)
 
-# CreateTeamRule Function
 def create_team_rule(tag_name, tag_value, team_id, access_token):
     """
     This function creates a team rule by adding tags to a team.
@@ -558,7 +615,7 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
     - tag_name: Name of the tag (e.g., "pteam").
     - tag_value: Value of the tag (e.g., the team name).
     - team_id: ID of the team.
-    - access_token: Access token for API authentication.
+    - access_token: API authentication token.
     """
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
     
@@ -573,7 +630,7 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
         ]
     }
 
-    api_url = construct_api_url(f"/v1/teams/{team_id}/components/auto-link/tags")
+    api_url = f"https://api.demo.appsecphx.io/v1/teams/{team_id}/components/auto-link/tags"
     
     try:
         # Make the POST request to create the team rule
@@ -587,6 +644,7 @@ def create_team_rule(tag_name, tag_value, team_id, access_token):
         else:
             print(f"Error: {e}")
             exit(1)
+
 
 @dispatch(list,list,list,list,list,str)
 def assign_users_to_team(p_teams, new_pteams, teams, all_team_access, hive_staff, access_token):
@@ -904,64 +962,47 @@ def populate_applications_and_environments(headers):
         exit(1)
 
     return components
+# Add the default function to handle NoneType for team (when team is missing)
+@dispatch(str, str, int, dict)
+def add_service(applicationSelectorName, service, tier, headers):
+    criticality = calculate_criticality(tier)
+    print(f" > Attempting to add {service} without specific team")
+    
+    payload = {
+        "name": service,
+        "criticality": criticality,
+        "applicationSelector": {
+            "name": applicationSelectorName
+        },
+        "tags": []  # No team tag since it's missing
+    }
 
-# Add service 1
+    api_url = construct_api_url("/v1/components")
+    response = requests.post(api_url, headers=headers, json=payload)
+    response.raise_for_status()
+    print(f" + Added Service: {service}")
+    time.sleep(2)
+
+# Dispatch version for when all arguments, including team, are provided
 @dispatch(str, str, int, str, dict)
 def add_service(applicationSelectorName, service, tier, team, headers):
     criticality = calculate_criticality(tier)
-    try:
-        print(f"> Attempting to add {service}")
-        payload = {
-            "name": service,
-            "criticality": criticality,
-            "tags": [{"key": "pteam", "value": team}],
-            "applicationSelector": {
-                "name": applicationSelectorName
-            }
-        }
-        api_url = construct_api_url("/v1/components")
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()
-        print(f" + Added Service: {service}")
-        time.sleep(2)
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Service {service} already exists")
-        else:
-            print(f"Error: {e}")
-            exit(1)
+    print(f" > Attempting to add {service} for team {team}")
+    
+    payload = {
+        "name": service,
+        "criticality": criticality,
+        "applicationSelector": {
+            "name": applicationSelectorName
+        },
+        "tags": [{"key": "pteam", "value": team}]
+    }
 
-@dispatch(str, str, int, str, dict, dict)
-def add_service(environment, service, tier, domain, subdomain_owners, headers):
-    criticality = calculate_criticality(tier)
-
-    try:
-        print(f"> Attempting to add {service}")
-        payload = {
-            "name": service,
-            "criticality": criticality,
-            "tags": [],
-            "applicationSelector": {
-                "name": environment
-            }
-        }
-
-        for team in subdomain_owners.get(service, []):
-            payload["tags"].append({"key": "pteam", "value": team})
-
-        payload["tags"].append({"key": "domain", "value": domain})
-
-        api_url = construct_api_url("/v1/components")
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()
-        print(f" + Added Service: {service}")
-        time.sleep(2)
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Service {service} already exists")
-        else:
-            print(f"Error: {e}")
-            exit(1)
+    api_url = construct_api_url("/v1/components")
+    response = requests.post(api_url, headers=headers, json=payload)
+    response.raise_for_status()
+    print(f" + Added Service: {service}")
+    time.sleep(2)
 
 @dispatch(str,dict,dict)
 def does_member_exist(email, team, headers):

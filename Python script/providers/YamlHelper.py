@@ -20,9 +20,9 @@ def populate_repositories(resource_folder):
         print("Please supply path for the resources")
         return repos
 
-    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+    core_structure = os.path.join(resource_folder, "core-structure.yaml")
 
-    with open(banking_core, 'r') as stream:
+    with open(core_structure, 'r') as stream:
         repos_yaml = yaml.safe_load(stream)
 
     for deployment_group in repos_yaml['DeploymentGroups']:
@@ -30,17 +30,15 @@ def populate_repositories(resource_folder):
             continue
         
         for row in deployment_group['BuildDefinitions']:
-            repositoryNames = row['RepositoryName']
+            repositoryNames = row.get('RepositoryName', [])
+            
+            # Check if repositoryNames is a string, if so convert to list
             if isinstance(repositoryNames, str):
-                item = {
-                    'RepositoryName': repositoryNames,
-                    'Domain': row['Domain'],
-                    'Tier': row['Tier'] if 'Tier' in row else 5,
-                    'Subdomain': row['SubDomain'],
-                    'Team': row['TeamName'],
-                    'BuildDefinitionName': row['BuildDefinitionName']
-                }
-                repos.append(item)
+                repositoryNames = [repositoryNames]
+            
+            # Ensure repositoryNames is iterable
+            if not isinstance(repositoryNames, list):
+                print(f"Warning: RepositoryName is not in an expected format for row: {row}")
                 continue
 
             for repositoryName in repositoryNames:
@@ -48,7 +46,7 @@ def populate_repositories(resource_folder):
                 item = {
                     'RepositoryName': repositoryName,
                     'Domain': row['Domain'],
-                    'Tier': row['Tier'] if 'Tier' in row else 5,
+                    'Tier': row.get('Tier', 5),
                     'Subdomain': row['SubDomain'],
                     'Team': row['TeamName'],
                     'BuildDefinitionName': row['BuildDefinitionName']
@@ -72,34 +70,41 @@ def populate_environments_from_env_groups(resource_folder):
         repos_yaml = yaml.safe_load(stream)
 
     for row in repos_yaml['Environment Groups']:
+        # Check if TeamName exists, otherwise, log and continue.
         if not 'TeamName' in row:
             print(f"Skipping environment {row['Name']}, as TeamName is missing.")
             continue
 
+        # Define the environment item
         item = {
             'Name': row['Name'],
             'Type': row['Type'],
             'Criticality': calculate_criticality(row['Tier']),
-            'CloudAccounts': [""],
+            'CloudAccounts': [""],  # Add CloudAccounts if applicable
             'Status': row['Status'],
             'Responsable': row['Responsable'],
-            'TeamName': row['TeamName'],
-            'Team': []
+            'TeamName': row.get('TeamName', None),  # Add TeamName from the environment or set as None
+            'Services': []  # To populate services later
         }
-        for team in row['Team']:
-            service = {
-                'Service': team['Service'],
-                'Type': team['Type'],
-                'Association': team['Association'],
-                'Association_value': team['Association_value'],
-                'Tier': team['Tier'] if 'Tier' in team else 5,
-                'TeamName': team['TeamName'] if team['TeamName'] else item['TeamName']
-            }
-            item['Team'].append(service)
+
+        # Now process the services under the "Team" or "Services" key
+        if 'Services' in row:
+            for service in row['Services']:
+                # Build the service entry with association details
+                service_entry = {
+                    'Service': service['Service'],
+                    'Type': service['Type'],
+                    'Association': service['Association'],
+                    'Association_value': service['Association_value'],
+                    'Tier': service.get('Tier', 5),  # Default tier to 5 if not specified
+                    'TeamName': service.get('TeamName', item['TeamName'])  # Default to environment's TeamName if missing
+                }
+                item['Services'].append(service_entry)
+
+        # Append the environment entry to the list of environments
         envs.append(item)
 
     return envs
-
 
 # Function to populate subdomain owners
 def populate_subdomain_owners(repos):
@@ -116,6 +121,10 @@ def populate_subdomain_owners(repos):
 
     return subdomains
 
+
+# Function to populate teams
+
+# Example of populating repositories - already in place, no changes needed unless additional processing is required
 
 # Function to populate teams
 def populate_teams(resource_folder):
@@ -188,12 +197,14 @@ def populate_all_access_emails(resource_folder):
         print("Please supply path for the resources")
         return all_access_emails
 
-    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+    core_structure = os.path.join(resource_folder, "core-structure.yaml")
 
-    with open(banking_core, 'r') as stream:
+    with open(core_structure, 'r') as stream:
         repos_yaml = yaml.safe_load(stream)
 
     return repos_yaml['AllAccessAccounts']
+
+# Populate applications
 
 # Populate applications
 def populate_applications(resource_folder):
@@ -203,9 +214,9 @@ def populate_applications(resource_folder):
         print("Please supply path for the resources")
         return apps
 
-    banking_core = os.path.join(resource_folder, "core-structure.yaml")
+    core_structure = os.path.join(resource_folder, "core-structure.yaml")
 
-    with open(banking_core, 'r') as stream:
+    with open(core_structure, 'r') as stream:
         apps_yaml = yaml.safe_load(stream)
 
     for row in apps_yaml['DeploymentGroups']:
@@ -219,7 +230,7 @@ def populate_applications(resource_folder):
             'TeamName': row['TeamName'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
-            'Criticality': calculate_criticality(row['Tier'] if 'Tier' in row else 5),
+            'Criticality': calculate_criticality(row.get('Tier', 5)),  # Use .get() to handle missing 'Tier'
             'Components': []
         }
 
@@ -227,16 +238,21 @@ def populate_applications(resource_folder):
             continue
 
         for component in row['Components']:
+            # Handle RepositoryName properly
+            repository_names = component.get('RepositoryName', [])
+            if isinstance(repository_names, str):
+                repository_names = [repository_names]
+
             comp = {
                 'ComponentName': component['ComponentName'],
                 'Status': component['Status'],
                 'Type': component['Type'],
-                'TeamName': component['TeamName'] if component['TeamName'] else app['TeamName'],
-                'RepositoryName':component['RepositoryName'] if 'RepositoryName' in component else None,
-                'Criticality': calculate_criticality(component['Tier'] if 'Tier' in component else 5),
-                'Domain': component['Domain'],
-                'SubDomain': component['SubDomain'],
-                'AutomaticSecurityReview': component['AutomaticSecurityReview'] if 'AutomaticSecurityReview' in component else None 
+                'TeamName': component.get('TeamName', app['TeamName']),  # Fallback to app's TeamName if missing
+                'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
+                'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
+                'Domain': component.get('Domain', None),  # Handle missing 'Domain'
+                'SubDomain': component.get('SubDomain', None),  # Handle missing 'SubDomain'
+                'AutomaticSecurityReview': component.get('AutomaticSecurityReview', None)  # Handle missing 'AutomaticSecurityReview'
             }
             app['Components'].append(comp)
         apps.append(app)
