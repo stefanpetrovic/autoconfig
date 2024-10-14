@@ -282,6 +282,7 @@ def create_application(app, headers):
             print(f" > Application {app['AppName']} already exists")
         else:
             print(f"Error: {e}")
+            print(response.content)
             exit(1)
     
     for component in app['Components']:
@@ -289,12 +290,14 @@ def create_application(app, headers):
         #create_custom_finding_rule(app, component, headers)
 
 def create_custom_component(applicationName, component, headers):
-    # Ensure valid tag values by filtering out empty or None values
+    # Ensure valid tag values by filtering out empty or None 
     tags = [
         {"key": "pteam", "value": component['TeamName']},
         {"key": "Status", "value": component['Status']},
         {"key": "Type", "value": component['Type']}
     ]
+
+    tags = list(filter(lambda tag : tag['value'], tags))
 
     # Add domain and subdomain tags only if they are not None or empty
     if component.get('Domain'):

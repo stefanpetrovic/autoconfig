@@ -226,7 +226,7 @@ def populate_applications(resource_folder):
 
         app = {
             'AppName': row['AppName'],
-            'Status': row['Status'],
+            'Status': row.get('Status', None),
             'TeamName': row['TeamName'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
@@ -245,8 +245,8 @@ def populate_applications(resource_folder):
 
             comp = {
                 'ComponentName': component['ComponentName'],
-                'Status': component['Status'],
-                'Type': component['Type'],
+                'Status': component.get('Status', None),
+                'Type': component.get('Type', None),
                 'TeamName': component.get('TeamName', app['TeamName']),  # Fallback to app's TeamName if missing
                 'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
                 'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
