@@ -94,43 +94,6 @@ def add_environment_services(repos, subdomains, environments, application_enviro
                         print(f"Error adding service {service['Service']} for environment {env_name}: {e}")
                 
                 add_service_rule_batch(environment, service, headers)
-                
-            #if not environment_service_exist(env_id, phoenix_components, "Databricks"):
-            #    add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
-
-            # Need to doublecheck this part
-            # grouped_repos = group_repos_by_subdomain(repos)
-
-            # for group_name, repos_in_subdomain in grouped_repos:
-            #     print(f"Subdomain: {group_name}")
-            #     build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
-            #     add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
-
-# AddEnvironmentServices Function
-# def add_environment_services(repos, subdomains, environments, application_environments, phoenix_components, subdomain_owners, teams, access_token):
-#     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
-
-#     for environment in environments:
-#         env_name = environment['Name']
-#         env_id = get_environment_id(application_environments, env_name)
-
-#         print(f"[Services] for {env_name}")
-
-#         if environment['CloudAccounts']:
-#             for subdomain in subdomains:
-#                 if not environment_service_exist(env_id, phoenix_components, subdomain['Name']):
-#                     add_service(env_name, subdomain['Name'], subdomain['Tier'], subdomain['Domain'], subdomain_owners, headers)
-
-#             if not environment_service_exist(env_id, phoenix_components, "Databricks"):
-#                 add_service(env_name, "Databricks", 5, "YOURDOMAIN Data", subdomain_owners, headers)
-
-#             grouped_repos = group_repos_by_subdomain(repos)
-
-#             for group_name, repos_in_subdomain in grouped_repos:
-#                 print(f"Subdomain: {group_name}")
-#                 build_definitions = [repo['BuildDefinitionName'] for repo in repos_in_subdomain]
-#                 add_service_rule_batch(environment, group_name, "pipeline", build_definitions, headers)
-
 
 # AddContainerRule Function
 def add_container_rule(image, subdomain, environment_name, access_token):
@@ -377,7 +340,6 @@ def create_custom_component(applicationName, component, headers):
         create_repository_rule(applicationName, component['ComponentName'], repo_name, headers)
 
 # Handle Repository Rule Creation for Components
-# TODO Investigate Create Rule for Repo 1
 def create_repository_rule(applicationName, componentName, repositoryName, headers):
     payload = {
         "selector": {
@@ -405,55 +367,6 @@ def create_repository_rule(applicationName, componentName, repositoryName, heade
             print(f"Error: {e}")
             print(f"Response content: {response.content}")
             exit(1)
-
-# def create_custom_finding_rule(application, component, headers):
-    
-#     # Create the payload
-#     payload = {
-#         "selector": {
-#             "applicationSelector": {
-#                 "name": application['AppName'],
-#                 "caseSensitive": False
-#             },
-#             "componentSelector": {
-#                 "name": component['ComponentName'],
-#                 "caseSensitive": False
-#             }
-#         },
-#         "rules": [
-#             {
-#                 "name": f"{application['AppName']} {component['ComponentName']}",
-#                 "filter": {
-#                     "tags": [
-#                         {
-#                             "key": "subdomain",
-#                             "value": application['AppName']
-#                         }
-#                     ],
-#                     "repository": get_repositories_from_component(component)
-#                 }
-#             }
-#         ]
-#     }
-
-#     api_url = construct_api_url("/v1/components/rules")
-
-#     try:
-#         # Make POST request to add the custom finding rule
-#         response = requests.post(api_url, headers=headers, json=payload)
-#         response.raise_for_status()
-#         print(f"{component['ComponentName']} rule added.")
-        
-#         # Sleep for 2 seconds
-#         time.sleep(2)
-        
-#     except requests.exceptions.RequestException as e:
-#         if response.status_code == 409:
-#             print(f" > Custom Component {component['ComponentName']} already exists")
-#         else:
-#             print(f"Error: {e}")
-#             print(f'Error message {response.content}')
-#             exit(1)
 
 def get_repositories_from_component(component):
     if not component['RepositoryName']:
@@ -1050,6 +963,7 @@ def populate_applications_and_environments(headers):
         exit(1)
 
     return components
+
 # Add the default function to handle NoneType for team (when team is missing)
 @dispatch(str, str, int, dict)
 def add_service(applicationSelectorName, service, tier, headers):
