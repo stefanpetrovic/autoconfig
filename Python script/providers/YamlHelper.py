@@ -2,6 +2,7 @@ import os
 import yaml
 from pathlib import Path
 from providers.Utils import calculate_criticality
+from email_validator import validate_email, EmailNotValidError
 
 # Check if PyYAML module exists
 try:
@@ -173,15 +174,20 @@ def populate_hives(resource_folder):
     with open(yaml_file, 'r') as stream:
         yaml_content = yaml.safe_load(stream)
 
+    is_custom_email = yaml_content.get('CustomEmail', False)
+    company_email_domain = yaml_content.get('CompanyEmailDomain', None)
+    if not is_custom_email and not company_email_domain:
+        company_email_domain = input('Please enter company email domain (without @ symbol):')
+
     for hive in yaml_content['Hives']:
         for team in hive['Teams']:
             products = []
             if team.get('Product'):
-                products = [p.strip().lower().replace(" ", ".") + "@company.com"
+                products = [conditionally_replace_first_last_name_with_email(is_custom_email, company_email_domain, p)
                             for p in team['Product'].split(' and ')]
 
             hive_object = {
-                'Lead': team['Lead'].strip().lower().replace(" ", ".") + "@company.com",
+                'Lead': conditionally_replace_first_last_name_with_email(is_custom_email, company_email_domain, team['Lead']),
                 'Product': products,
                 'Team': team['Name']
             }
@@ -189,6 +195,20 @@ def populate_hives(resource_folder):
             hives.append(hive_object)
 
     return hives
+
+# If is_custom_email=True, only validate the emails and don't replace anything
+def conditionally_replace_first_last_name_with_email(is_custom_email, company_email_domain, first_last_name_or_email):
+    if (is_custom_email):
+        try:
+            result = validate_email(first_last_name_or_email)
+            return
+        except EmailNotValidError as e:
+            print(str(e))
+            exit(1)
+
+    
+    return first_last_name_or_email.strip().lower().replace(" ", ".") + "@" + company_email_domain
+
 
 def populate_all_access_emails(resource_folder):
     all_access_emails = []
@@ -226,7 +246,7 @@ def populate_applications(resource_folder):
 
         app = {
             'AppName': row['AppName'],
-            'Status': row['Status'],
+            'Status': row.get('Status', None),
             'TeamName': row['TeamName'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
@@ -245,8 +265,8 @@ def populate_applications(resource_folder):
 
             comp = {
                 'ComponentName': component['ComponentName'],
-                'Status': component['Status'],
-                'Type': component['Type'],
+                'Status': component.get('Status', None),
+                'Type': component.get('Type', None),
                 'TeamName': component.get('TeamName', app['TeamName']),  # Fallback to app's TeamName if missing
                 'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
                 'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
