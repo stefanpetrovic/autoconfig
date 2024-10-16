@@ -5,7 +5,9 @@ Date - 14 October 2024
 
 # Introduction
 
-This [repo](xxx) provides a method of getting data from your organization's repos, teams, and domains to [Phoenix](https://phoenix domain).
+This [repo](xxx) provides a method of getting data from your organization's repos, teams, and domains to [Phoenix](https://demo2.appsecphx.io/) using
+** [Python] (https://github.com/Security-Phoenix-demo/autoconfig/tree/main/Python%20script) 
+** [Powershell] (https://github.com/Security-Phoenix-demo/autoconfig/tree/main/Power%20Shell%20script)
 
 The following API credentials are required:
 
@@ -14,6 +16,7 @@ The following API credentials are required:
 ## Customization
 
 The API and @company.com present in various parts of the script for override should be changed with your company name and domain. 
+this parameters is parametrizable 
 
 ## Schedule
 
