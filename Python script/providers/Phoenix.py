@@ -264,9 +264,13 @@ def create_application(app, headers):
         "name": app['AppName'],
         "type": "APPLICATION",
         "criticality": app['Criticality'],
-        "tags": [{"key": "pteam", "value": app['TeamName']}],
+        "tags": [],
         "owner": {"email": app['Responsable']}
     }
+
+    for team in app['TeamNames']:
+        payload['tags'].append({"key": "pteam", "value": team})
+                               
     if DEBUG:
         print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
 
@@ -287,15 +291,16 @@ def create_application(app, headers):
     
     for component in app['Components']:
         create_custom_component(app['AppName'], component, headers)
-        #create_custom_finding_rule(app, component, headers)
 
 def create_custom_component(applicationName, component, headers):
     # Ensure valid tag values by filtering out empty or None 
     tags = [
-        {"key": "pteam", "value": component['TeamName']},
         {"key": "Status", "value": component['Status']},
         {"key": "Type", "value": component['Type']}
     ]
+
+    for team in component['TeamNames']:
+        tags.append({"key": "pteam", "value": team})
 
     tags = list(filter(lambda tag : tag['value'], tags))
 
