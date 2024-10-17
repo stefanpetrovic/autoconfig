@@ -240,14 +240,14 @@ def populate_applications(resource_folder):
         apps_yaml = yaml.safe_load(stream)
 
     for row in apps_yaml['DeploymentGroups']:
-        if not 'TeamName' in row:
-            print(f"Skipping environment {row['AppName']}, as TeamName is missing.")
+        if not 'TeamNames' in row:
+            print(f"Skipping application {row['AppName']}, as TeamNames are missing.")
             continue
 
         app = {
             'AppName': row['AppName'],
             'Status': row.get('Status', None),
-            'TeamName': row['TeamName'],
+            'TeamNames': row['TeamNames'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
             'Criticality': calculate_criticality(row.get('Tier', 5)),  # Use .get() to handle missing 'Tier'
@@ -267,7 +267,7 @@ def populate_applications(resource_folder):
                 'ComponentName': component['ComponentName'],
                 'Status': component.get('Status', None),
                 'Type': component.get('Type', None),
-                'TeamName': component.get('TeamName', app['TeamName']),  # Fallback to app's TeamName if missing
+                'TeamNames': component.get('TeamNames', app['TeamNames']),  # Fallback to app's TeamNames if missing
                 'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
                 'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
                 'Domain': component.get('Domain', None),  # Handle missing 'Domain'
