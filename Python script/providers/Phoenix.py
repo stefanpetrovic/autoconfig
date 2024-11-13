@@ -212,7 +212,8 @@ def add_service_rule_batch(environment, service, headers):
 
     try:
         api_url = construct_api_url("/v1/components/rules")
-        print(f"Payload being sent to {api_url}: {json.dumps(payload, indent=2)}")
+        if DEBUG:
+            print(f"Payload being sent to {api_url}: {json.dumps(payload, indent=2)}")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         print(f"+ Service Rule added for {service['Service']}")
@@ -252,11 +253,13 @@ def add_service_rule(environment, service, tag_name, tag_value, access_token):
             print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
 
 
-def create_applications(applications, application_environments, headers):
+def create_applications(applications, application_environments, phoenix_components, headers):
     print('[Applications]')
     for application in applications:
         if not any(env['name'] == application['AppName'] and env['type'] == "APPLICATION" for env in application_environments):
             create_application(application, headers)
+        else:
+            update_application(application, application_environments, phoenix_components, headers)
 
 
 def create_application(app, headers):
@@ -347,6 +350,23 @@ def create_custom_component(applicationName, component, headers):
     for repo_name in repository_names:
         create_repository_rule(applicationName, component['ComponentName'], repo_name, headers)
 
+def update_application(application, existing_apps_envs, existing_components, headers):
+    existing_app = next(filter(lambda app: app['name'] == application['AppName'] and app['type'] == "APPLICATION", existing_apps_envs), None)
+    if not existing_app:
+        print(f"Unexpected call to the update application, as the application does not exist")
+    
+    for component in application['Components']:
+        # if new component, create it, otherwise update repos
+        if not next(filter(lambda comp: comp['name'] == component['ComponentName'], existing_components), None):
+            create_custom_component(application['AppName'], component, headers)
+            continue
+
+        repository_names = component.get('RepositoryName', [])
+        if isinstance(repository_names, str):
+            repository_names = [repository_names]
+        for repo_name in repository_names:
+            create_repository_rule(application['AppName'], component['ComponentName'], repo_name, headers)
+
 # Handle Repository Rule Creation for Components
 def create_repository_rule(applicationName, componentName, repositoryName, headers):
     payload = {
@@ -384,55 +404,6 @@ def get_repositories_from_component(component):
         return [component['RepositoryName']]
     
     return component['RepositoryName']
-
-# CreateRepositories Function
-def create_repositories(repos, access_token):
-    # Iterate over the list of repositories and call the create_repo function
-    for repo in repos:
-        create_repo(repo, access_token)
-
-# CreateRepo Function
-def create_repo(repo, access_token):
-    headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
-    
-    # Calculate criticality (assuming a function `calculate_criticality` exists)
-    criticality = calculate_criticality(repo['Tier'])
-    
-    # Create the payload, the function assume 1 repo per component with the component name being the repository this can be edited
-    payload = {
-        "repository": f"{repo['RepositoryName']}",
-        "applicationSelector": {
-            "name": repo['Subdomain'],
-            "caseSensitive": False
-        },
-        "component": {
-            "name": repo['RepositoryName'],
-            "criticality": criticality,
-            "tags": [
-                {"key": "pteam", "value": repo['Team']},
-                {"key": "domain", "value": repo['Domain']},
-                {"key": "subdomain", "value": repo['Subdomain']}
-            ]
-        }
-    }
-    if DEBUG:
-        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
-
-
-    api_url = construct_api_url("/v1/applications/repository")
-
-    try:
-        # Make POST request to create the repository
-        response = requests.post(api_url, headers=headers, json=payload)
-        response.raise_for_status()
-        print(f" + {repo['RepositoryName']} added.")
-    
-    except requests.exceptions.RequestException as e:
-        if response.status_code == 409:
-            print(f" > Repo {repo['RepositoryName']} already exists")
-        else:
-            print(f"Error: {e}")
-            exit(1)
 
 # AddCloudAssetRules Function
 def add_cloud_asset_rules(repos, access_token):
