@@ -405,6 +405,55 @@ def get_repositories_from_component(component):
     
     return component['RepositoryName']
 
+# CreateRepositories Function
+def create_repositories(repos, access_token):
+    # Iterate over the list of repositories and call the create_repo function
+    for repo in repos:
+        create_repo(repo, access_token)
+
+# CreateRepo Function
+def create_repo(repo, access_token):
+    headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
+    
+    # Calculate criticality (assuming a function `calculate_criticality` exists)
+    criticality = calculate_criticality(repo['Tier'])
+    
+    # Create the payload, the function assume 1 repo per component with the component name being the repository this can be edited
+    payload = {
+        "repository": f"{repo['RepositoryName']}",
+        "applicationSelector": {
+            "name": repo['Subdomain'],
+            "caseSensitive": False
+        },
+        "component": {
+            "name": repo['RepositoryName'],
+            "criticality": criticality,
+            "tags": [
+                {"key": "pteam", "value": repo['Team']},
+                {"key": "domain", "value": repo['Domain']},
+                {"key": "subdomain", "value": repo['Subdomain']}
+            ]
+        }
+    }
+    if DEBUG:
+        print(f"Payload being sent to /v1rule: {json.dumps(payload, indent=2)}")
+
+
+    api_url = construct_api_url("/v1/applications/repository")
+
+    try:
+        # Make POST request to create the repository
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f" + {repo['RepositoryName']} added.")
+    
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > Repo {repo['RepositoryName']} already exists")
+        else:
+            print(f"Error: {e}")
+            exit(1)
+
 # AddCloudAssetRules Function
 def add_cloud_asset_rules(repos, access_token):
     headers = {'Authorization': f"Bearer {access_token}", 'Content-Type': 'application/json'}
