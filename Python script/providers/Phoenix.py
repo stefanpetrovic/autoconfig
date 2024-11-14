@@ -357,6 +357,8 @@ def update_application(application, existing_apps_envs, existing_components, hea
     
     update_application_teams(existing_app, application, headers)
 
+    update_application_crit_owner(application, existing_app, headers)
+
     for component in application['Components']:
         # if new component, create it, otherwise update repos
         if not next(filter(lambda comp: comp['name'] == component['ComponentName'], existing_components), None):
@@ -377,6 +379,30 @@ def update_application_teams(existing_app, application, headers):
     for new_team in application.get('TeamNames'):
         if not next(filter(lambda team: team.get('key') == 'pteam' and team['value'] == new_team, existing_app.get('tags')), None):
             add_tag_to_application('pteam', new_team, existing_app.get('id'), headers)
+
+def update_application_crit_owner(application, existing_application, headers):
+    if application['Criticality'] == existing_application.get('criticality') and application['Responsable'] == existing_application.get('owner').get('email'):
+        if DEBUG:
+            print(f"No change detected to update for application {application['AppName']}")
+        return
+    
+    payload = {
+        "name": application['AppName'],
+        "criticality": application['Criticality'],
+        "owner": {"email": application['Responsable']}
+    }
+
+    try:
+        api_url = construct_api_url(f"/v1/applications/{existing_application.get('id')}")
+        response = requests.patch(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f"Updated application {application['AppName']}.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        print(f"Response content: {response.content}")
+        exit(1)
+
+
             
 # Handle Repository Rule Creation for Components
 def create_repository_rule(applicationName, componentName, repositoryName, headers):

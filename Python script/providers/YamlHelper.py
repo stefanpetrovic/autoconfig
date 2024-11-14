@@ -250,7 +250,7 @@ def populate_applications(resource_folder):
             'TeamNames': row['TeamNames'],
             'ReleaseDefinitions': row['ReleaseDefinitions'],
             'Responsable': row['Responsable'],
-            'Criticality': calculate_criticality(row.get('Tier', 5)),  # Use .get() to handle missing 'Tier'
+            'Criticality': calculate_criticality(str(row.get('Tier', 5))),  # Use .get() to handle missing 'Tier'
             'Components': []
         }
 
