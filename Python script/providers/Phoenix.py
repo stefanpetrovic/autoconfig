@@ -355,6 +355,8 @@ def update_application(application, existing_apps_envs, existing_components, hea
     if not existing_app:
         print(f"Unexpected call to the update application, as the application does not exist")
     
+    update_application_teams(existing_app, application, headers)
+
     for component in application['Components']:
         # if new component, create it, otherwise update repos
         if not next(filter(lambda comp: comp['name'] == component['ComponentName'], existing_components), None):
@@ -367,6 +369,15 @@ def update_application(application, existing_apps_envs, existing_components, hea
         for repo_name in repository_names:
             create_repository_rule(application['AppName'], component['ComponentName'], repo_name, headers)
 
+def update_application_teams(existing_app, application, headers):
+    for team in filter(lambda tag: tag.get('key') == 'pteam', existing_app.get('tags')):
+        if team.get('value') not in application.get('TeamNames'):
+            remove_tag_from_application(team.get('id'), team.get('key'), team.get('value'), existing_app.get('id'), headers)
+
+    for new_team in application.get('TeamNames'):
+        if not next(filter(lambda team: team.get('key') == 'pteam' and team['value'] == new_team, existing_app.get('tags')), None):
+            add_tag_to_application('pteam', new_team, existing_app.get('id'), headers)
+            
 # Handle Repository Rule Creation for Components
 def create_repository_rule(applicationName, componentName, repositoryName, headers):
     payload = {
@@ -932,6 +943,71 @@ def remove_tag(tag_id, tag_key, tag_value,access_token):
         print(f"Tag {tag_key} with value {tag_value} removed successfully.")
     except requests.exceptions.RequestException as e:
         print(f"Error removing tag: {e}")
+
+def remove_tag_from_application(tag_id, tag_key, tag_value, application_id, headers):
+    """
+    Removes the specified tag by making a DELETE or PATCH API call.
+
+    Args:
+    - tag_id: The ID of the tag to remove.
+    - tag_key: The key of the tag.
+    - tag_value: The value of the tag.
+    - application_id: The ID of the application having the tag
+    """
+    # Payload for removing the tag
+    payload = {
+        "action": "delete",
+        "tags": [
+            {
+                "id": tag_id,
+                "key": tag_key,
+                "value": tag_value
+            }
+        ]
+    }
+    if DEBUG:
+        print(f"Payload being sent to /v1-application-tags: {json.dumps(payload, indent=2)}")
+
+    api_url = construct_api_url(f"/v1/applications/{application_id}/tags")
+
+
+    try:
+        response = requests.patch(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f"Tag {tag_key} with value {tag_value} removed successfully.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error removing tag: {e}")
+
+def add_tag_to_application(tag_key, tag_value, application_id, headers):
+    """
+    Add the specified tag by making a PUT API call.
+
+    Args:
+    - tag_key: The key of the tag.
+    - tag_value: The value of the tag.
+    - application_id: The application to tag
+    """
+    # Payload for removing the tag
+    payload = {
+        "tags": [
+            {
+                "key": tag_key,
+                "value": tag_value
+            }
+        ]
+    }
+    if DEBUG:
+        print(f"Payload being sent to /v1-application-tags: {json.dumps(payload, indent=2)}")
+
+    api_url = construct_api_url(f"/v1/applications/{application_id}/tags")
+
+
+    try:
+        response = requests.put(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f"Tag {tag_key} with value {tag_value} added successfully.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error adding tag: {e}")
 
 # Helper function to assign users to a team
 def api_call_assign_users_to_team(team_id, user_email, access_token):
