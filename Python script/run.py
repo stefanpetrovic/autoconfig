@@ -127,7 +127,7 @@ if action_cloud:
 
 if action_code:
     print("Performing Code Actions")
-    create_applications(applications, app_environments, headers)
+    create_applications(applications, app_environments, phoenix_components, headers)
         
     print(f"[Diagnostic] [Code] Time Taken: {time.time() - start_time}")
 
