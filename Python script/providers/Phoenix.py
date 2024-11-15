@@ -796,13 +796,13 @@ def assign_users_to_team(p_teams, new_pteams, teams, all_team_access, hive_staff
 
                 # Assign users from AllTeamAccess that are not part of the current team members
                 for user_email in all_team_access:
-                    found = any(member['email'] == user_email for member in team_members)
+                    found = any(member['email'].lower() == user_email.lower() for member in team_members)
                     if not found:
                         api_call_assign_users_to_team(pteam['id'], user_email, headers)
 
                 # Assign team members from the team if they are not part of the current team members
                 for team_member in team['TeamMembers']:
-                    found = any(member['email'] == team_member['EmailAddress'] for member in team_members)
+                    found = any(member['email'].lower() == team_member['EmailAddress'].lower() for member in team_members)
                     if not found:
                         api_call_assign_users_to_team(pteam['id'], team_member['EmailAddress'], headers)
 
@@ -1159,9 +1159,9 @@ def does_member_exist(user_email, team, hive_staff, all_team_access):
     """
     Checks if a team member exists in the provided lists (team, hive_staff, or all_team_access).
     """
-    return any(user_email == member['EmailAddress'] for member in team['TeamMembers']) or \
-           user_email in all_team_access or \
-           any(user_email == staff_member['Lead'] or user_email in staff_member['Product'] for staff_member in hive_staff)
+    return any(user_email.lower() == member['EmailAddress'].lower() for member in team['TeamMembers']) or \
+           user_email.lower() in (lc_all_team_access.lower() for lc_all_team_access in all_team_access) or \
+           any(user_email.lower() == staff_member['Lead'].lower() or user_email.lower() in staff_member['Product'].lower() for staff_member in hive_staff)
 
 
 
