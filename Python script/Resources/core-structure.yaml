@@ -2,7 +2,7 @@
 AllAccessAccounts: # Not mandatory - list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - AppName: TST_TestApp106 #name of the application
+  - AppName: TST_TestApp109 #name of the application
     #Status: NotStarted #Status tags optionals (get added as tags)
     TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
       - SP_lima20
@@ -11,15 +11,27 @@ DeploymentGroups:
     SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
     ReleaseDefinitions: []
     Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
-    Tier: 2 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
     Components:
-      - ComponentName: product106-repo1 #name of the component 
+      - ComponentName: product106-repo10 #name of the component 
+        Status: Production #Tag Optional
+        Type: Release #Tag Optional
+        TeamNames:  #names of the team as it appears in hives and teams
+          - SP_axelot20
+          - SP_lima20
+        #RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
+        SearchRepository: srch_rule
+        Tier: 3 #importance from 1-10
+        Domain: Security  #domain = component or application can be used to group by bysiness unit
+        SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+        AutomaticSecurityReview: false #optional
+      - ComponentName: product106-repo1-upsert #name of the component 
         #Status: Production #Tag Optional
         #Type: Release #Tag Optional
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
-          - SP_lima20
-        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
+          #- SP_lima20
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code222  #name of the repo as appears in phoenix ,can be more than one
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
@@ -29,7 +41,9 @@ DeploymentGroups:
         Type: Release
         TeamNames: 
           - SP_lima20
-        RepositoryName: Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
+        RepositoryName: 
+          - Phoenix-ent-demo/gha-sample-workflows-WebGoat.NET
+          - Phoenix-ent-demo/gha-sample-workflows-WebGoat2.NET
   - AppName: FR_CoreApp205
     Status: NotStarted
     TeamNames: 

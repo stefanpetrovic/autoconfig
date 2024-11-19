@@ -342,13 +342,14 @@ def create_custom_component(applicationName, component, headers):
 
     # Ensure RepositoryName is not None and is iterable
     repository_names = component.get('RepositoryName', [])
-    
-    # If RepositoryName is not a list but a string, convert it to a list
-    if isinstance(repository_names, str):
-        repository_names = [repository_names]
-
-    for repo_name in repository_names:
-        create_repository_rule(applicationName, component['ComponentName'], repo_name, headers)
+    if component.get('SearchRepository'):
+        create_component_rule(applicationName, component['ComponentName'], None, component['SearchRepository'], headers)
+    else:
+        # If RepositoryName is not a list but a string, convert it to a list
+        if isinstance(repository_names, str):
+            repository_names = [repository_names]
+        for repo_name in repository_names:
+            create_component_rule(applicationName, component['ComponentName'], repo_name, None, headers)
 
 def update_application(application, existing_apps_envs, existing_components, headers):
     existing_app = next(filter(lambda app: app['name'] == application['AppName'] and app['type'] == "APPLICATION", existing_apps_envs), None)
@@ -372,7 +373,7 @@ def update_application(application, existing_apps_envs, existing_components, hea
         if isinstance(repository_names, str):
             repository_names = [repository_names]
         for repo_name in repository_names:
-            create_repository_rule(application['AppName'], component['ComponentName'], repo_name, headers)
+            create_component_rule(application['AppName'], component['ComponentName'], repo_name, None, headers)
 
 def update_component(application, component, existing_component, headers):
     for team in filter(lambda tag: tag.get('key') == 'pteam', existing_component.get('tags')):
@@ -467,16 +468,21 @@ def update_application_crit_owner(application, existing_application, headers):
 
             
 # Handle Repository Rule Creation for Components
-def create_repository_rule(applicationName, componentName, repositoryName, headers):
+def create_component_rule(applicationName, componentName, repositoryName, searchRepository, headers):
+    rule = dict()
+    if searchRepository:
+        rule['name'] = f"Search rule for {searchRepository}"
+        rule['filter'] = {"keyLike": searchRepository}
+    else:
+        rule['name'] = f"Repository rule for {repositoryName}"
+        rule['filter'] = {"repository": [repositoryName]}
+
     payload = {
         "selector": {
             "applicationSelector": {"name": applicationName, "caseSensitive": False},
             "componentSelector": {"name": componentName, "caseSensitive": False}
         },
-        "rules": [{
-            "name": f"Repository rule for {repositoryName}",
-            "filter": {"repository": [repositoryName]}
-        }]
+        "rules": [rule]
     }
 
     if DEBUG:
@@ -486,10 +492,10 @@ def create_repository_rule(applicationName, componentName, repositoryName, heade
         api_url = construct_api_url("/v1/components/rules")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f"Rule for {repositoryName} created.")
+        print(f"Rule for {repositoryName if repositoryName else searchRepository } created.")
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > Rule for {repositoryName} already exists.")
+            print(f" > Rule for {repositoryName if repositoryName else searchRepository} already exists.")
         else:
             print(f"Error: {e}")
             print(f"Response content: {response.content}")
