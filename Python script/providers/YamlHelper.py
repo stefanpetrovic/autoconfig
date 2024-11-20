@@ -269,7 +269,8 @@ def populate_applications(resource_folder):
                 'Type': component.get('Type', None),
                 'TeamNames': component.get('TeamNames', app['TeamNames']),  # Fallback to app's TeamNames if missing
                 'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
-                'SearchRepository': component.get('SearchRepository', None),
+                'SearchName': component.get('SearchName', None),
+                'MultiConditionRule': load_multi_condition_rule(component),
                 'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
                 'Domain': component.get('Domain', None),  # Handle missing 'Domain'
                 'SubDomain': component.get('SubDomain', None),  # Handle missing 'SubDomain'
@@ -279,3 +280,19 @@ def populate_applications(resource_folder):
         apps.append(app)
 
     return apps
+
+def load_multi_condition_rule(component):
+    if not 'MultiConditionRule' in component:
+        return None
+    
+    rule = {
+        "RepositoryName": component['MultiConditionRule'].get("RepositoryName", None),
+        "SearchName": component['MultiConditionRule'].get("SearchName", None),
+        "Tags": component['MultiConditionRule'].get("Tags", None)
+    }
+
+    if not rule['RepositoryName'] and not rule['SearchName'] and not rule['Tags']:
+        return None
+
+    return rule
+    

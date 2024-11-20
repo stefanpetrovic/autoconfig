@@ -340,16 +340,19 @@ def create_custom_component(applicationName, component, headers):
             print(f"Response content: {response.content}")
             exit(1)
 
+    if component.get('SearchName'):
+        create_component_rule(applicationName, component['ComponentName'], None, component['SearchName'], headers)
+
+    if component.get('MultiConditionRule'):
+        create_multicondition_component_rule(applicationName, component['ComponentName'], component.get('MultiConditionRule'), headers)
+
     # Ensure RepositoryName is not None and is iterable
     repository_names = component.get('RepositoryName', [])
-    if component.get('SearchRepository'):
-        create_component_rule(applicationName, component['ComponentName'], None, component['SearchRepository'], headers)
-    else:
-        # If RepositoryName is not a list but a string, convert it to a list
-        if isinstance(repository_names, str):
-            repository_names = [repository_names]
-        for repo_name in repository_names:
-            create_component_rule(applicationName, component['ComponentName'], repo_name, None, headers)
+    # If RepositoryName is not a list but a string, convert it to a list
+    if isinstance(repository_names, str):
+        repository_names = [repository_names]
+    for repo_name in repository_names:
+        create_component_rule(applicationName, component['ComponentName'], repo_name, None, headers)
 
 def update_application(application, existing_apps_envs, existing_components, headers):
     existing_app = next(filter(lambda app: app['name'] == application['AppName'] and app['type'] == "APPLICATION", existing_apps_envs), None)
@@ -368,6 +371,12 @@ def update_application(application, existing_apps_envs, existing_components, hea
             continue
 
         update_component(application, component, existing_component, headers)
+
+        if component.get('SearchName'):
+            create_component_rule(application['AppName'], component['ComponentName'], None, component['SearchName'], headers)
+
+        if component.get('MultiConditionRule'):
+            create_multicondition_component_rule(application['AppName'], component['ComponentName'], component.get('MultiConditionRule'), headers)
 
         repository_names = component.get('RepositoryName', [])
         if isinstance(repository_names, str):
@@ -496,6 +505,45 @@ def create_component_rule(applicationName, componentName, repositoryName, search
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
             print(f" > Rule for {repositoryName if repositoryName else searchRepository} already exists.")
+        else:
+            print(f"Error: {e}")
+            print(f"Response content: {response.content}")
+            exit(1)
+
+def create_multicondition_component_rule(applicationName, componentName, multicondition, headers):
+    rule = {'name': 'Multicondition Rule'}
+    rule['filter'] = {}
+    if multicondition.get('SearchName'):
+        rule['filter']['keyLike'] = multicondition.get('SearchName')
+    if multicondition.get('RepositoryName'):
+        repository_names = multicondition.get('RepositoryName')
+        if isinstance(repository_names, str):
+            repository_names = [repository_names]
+        rule['filter']['repository'] = repository_names
+    if multicondition.get('Tags'):
+        rule['filter']['tags'] = []
+        for tag in multicondition.get('Tags'):
+            rule['filter']['tags'].append({"value": tag})
+
+    payload = {
+        "selector": {
+            "applicationSelector": {"name": applicationName, "caseSensitive": False},
+            "componentSelector": {"name": componentName, "caseSensitive": False}
+        },
+        "rules": [rule]
+    }
+
+    if DEBUG:
+        print(f"Payload for multicondition {componentName}: {json.dumps(payload, indent=2)}")
+
+    try:
+        api_url = construct_api_url("/v1/components/rules")
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print(f"Multicondition Rule for {componentName} created.")
+    except requests.exceptions.RequestException as e:
+        if response.status_code == 409:
+            print(f" > Multicondition Rule for {componentName} already exists.")
         else:
             print(f"Error: {e}")
             print(f"Response content: {response.content}")
