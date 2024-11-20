@@ -19,8 +19,14 @@ DeploymentGroups:
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
           - SP_lima20
-        #RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
-        SearchRepository: srch_rule
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
+        SearchName: search_item
+        MultiConditionRule:
+          RepositoryName: testrepo
+          SearchName: testsearch
+          Tags:
+            - 123
+            - 1235
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit

@@ -160,6 +160,11 @@ Team allocation is performed by added a `pteam` tag to the API request to Phoeni
 
 Example `pteam:axelot`.
 
+Mapping assets with components is done via:
+1. RepositoryName - creates repository rule 
+2. SearchName - creates search rule
+3. MultiConditionRule - can combine repos, search, tags etc in one rule
+
 The function for Component creation is [CreateRepositories](Phoenix.ps1).
 
 ## Deployed Applications
