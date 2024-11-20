@@ -282,7 +282,7 @@ def populate_applications(resource_folder):
     return apps
 
 def load_multi_condition_rule(component):
-    if not 'MultiConditionRule' in component:
+    if not 'MultiConditionRule' in component or not component['MultiConditionRule']:
         return None
     
     rule = {
