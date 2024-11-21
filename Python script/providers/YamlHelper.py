@@ -270,6 +270,16 @@ def populate_applications(resource_folder):
                 'TeamNames': component.get('TeamNames', app['TeamNames']),  # Fallback to app's TeamNames if missing
                 'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
                 'SearchName': component.get('SearchName', None),
+                "Tags": component.get("Tags", None),
+                "Cidr": component.get("Cidr", None),
+                "Fqdn": component.get("Fqdn", None),
+                "Netbios": component.get("Netbios", None),
+                "OsNames": component.get("OsNames", None),
+                "Hostnames": component.get("Hostnames", None),
+                "ProviderAccountId": component.get("ProviderAccountId", None),
+                "ProviderAccountName": component.get("ProviderAccountName", None),
+                "ResourceGroup": component.get("ResourceGroup", None),
+                "AssetType": component.get("AssetType", None),
                 'MultiConditionRule': load_multi_condition_rule(component),
                 'Criticality': calculate_criticality(component.get('Tier', 5)),  # Handle missing 'Tier'
                 'Domain': component.get('Domain', None),  # Handle missing 'Domain'
@@ -288,10 +298,19 @@ def load_multi_condition_rule(component):
     rule = {
         "RepositoryName": component['MultiConditionRule'].get("RepositoryName", None),
         "SearchName": component['MultiConditionRule'].get("SearchName", None),
-        "Tags": component['MultiConditionRule'].get("Tags", None)
+        "Tags": component['MultiConditionRule'].get("Tags", None),
+        "Cidr": component['MultiConditionRule'].get("Cidr", None),
+        "Fqdn": component['MultiConditionRule'].get("Fqdn", None),
+        "Netbios": component['MultiConditionRule'].get("Netbios", None),
+        "OsNames": component['MultiConditionRule'].get("OsNames", None),
+        "Hostnames": component['MultiConditionRule'].get("Hostnames", None),
+        "ProviderAccountId": component['MultiConditionRule'].get("ProviderAccountId", None),
+        "ProviderAccountName": component['MultiConditionRule'].get("ProviderAccountName", None),
+        "ResourceGroup": component['MultiConditionRule'].get("ResourceGroup", None),
+        "AssetType": component['MultiConditionRule'].get("AssetType", None)
     }
 
-    if not rule['RepositoryName'] and not rule['SearchName'] and not rule['Tags']:
+    if not rule['RepositoryName'] and not rule['SearchName'] and not rule['Tags'] and not rule['Cidr']:
         return None
 
     return rule

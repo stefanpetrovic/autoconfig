@@ -21,12 +21,47 @@ DeploymentGroups:
           - SP_lima20
         RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
         SearchName: search_item
+        AssetType: REPOSITORY #Look up possible values in the documentation
+        Tags:
+          - "123"
+          - "1235"
+        Cidr: 10.1.1.0/24
+        Fqdn: 
+          - testfqdn
+        Netbios: 
+          - testbios
+        OsNames: 
+          - testosnames
+        Hostnames: 
+          - testhostnames
+        ProviderAccountId: 
+          - testaccountid
+        ProviderAccountName: 
+          - testaccountname
+        ResourceGroup: 
+          - testresourcegroup
         MultiConditionRule:
+          AssetType: REPOSITORY #Look up possible values in the documentation
           RepositoryName: testrepo
-          SearchName: testsearch
+          SearchName: testsearch2
           Tags:
-            - 123
-            - 1235
+            - "123"
+            - "1235"
+          Cidr: 10.1.1.0/24
+          Fqdn: 
+            - testfqdn
+          Netbios: 
+            - testbios
+          OsNames: 
+            - testosnames
+          Hostnames: 
+            - testhostnames
+          ProviderAccountId: 
+            - testaccountid
+          ProviderAccountName: 
+            - testaccountname
+          ResourceGroup: 
+            - testresourcegroup
         Tier: 3 #importance from 1-10
         Domain: Security  #domain = component or application can be used to group by bysiness unit
         SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
