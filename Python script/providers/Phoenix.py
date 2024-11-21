@@ -340,19 +340,7 @@ def create_custom_component(applicationName, component, headers):
             print(f"Response content: {response.content}")
             exit(1)
 
-    if component.get('SearchName'):
-        create_component_rule(applicationName, component['ComponentName'], None, component['SearchName'], headers)
-
-    if component.get('MultiConditionRule'):
-        create_multicondition_component_rule(applicationName, component['ComponentName'], component.get('MultiConditionRule'), headers)
-
-    # Ensure RepositoryName is not None and is iterable
-    repository_names = component.get('RepositoryName', [])
-    # If RepositoryName is not a list but a string, convert it to a list
-    if isinstance(repository_names, str):
-        repository_names = [repository_names]
-    for repo_name in repository_names:
-        create_component_rule(applicationName, component['ComponentName'], repo_name, None, headers)
+    create_component_rules(applicationName, component, headers)
 
 def update_application(application, existing_apps_envs, existing_components, headers):
     existing_app = next(filter(lambda app: app['name'] == application['AppName'] and app['type'] == "APPLICATION", existing_apps_envs), None)
@@ -371,18 +359,7 @@ def update_application(application, existing_apps_envs, existing_components, hea
             continue
 
         update_component(application, component, existing_component, headers)
-
-        if component.get('SearchName'):
-            create_component_rule(application['AppName'], component['ComponentName'], None, component['SearchName'], headers)
-
-        if component.get('MultiConditionRule'):
-            create_multicondition_component_rule(application['AppName'], component['ComponentName'], component.get('MultiConditionRule'), headers)
-
-        repository_names = component.get('RepositoryName', [])
-        if isinstance(repository_names, str):
-            repository_names = [repository_names]
-        for repo_name in repository_names:
-            create_component_rule(application['AppName'], component['ComponentName'], repo_name, None, headers)
+        create_component_rules(application['AppName'], component, headers)
 
 def update_component(application, component, existing_component, headers):
     for team in filter(lambda tag: tag.get('key') == 'pteam', existing_component.get('tags')):
@@ -474,17 +451,50 @@ def update_application_crit_owner(application, existing_application, headers):
         print(f"Response content: {response.content}")
         exit(1)
 
+def create_component_rules(applicationName, component, headers):
+    if component.get('SearchName'):
+        create_component_rule(applicationName, component['ComponentName'], 'keyLike', component['SearchName'], headers)
+    if component.get('Tags'):
+        tags_to_add = []
+        for tag in component.get('Tags'):
+            tags_to_add.append({'value': tag})
+        create_component_rule(applicationName, component['ComponentName'], 'tags', tags_to_add, headers)
+    if component.get('Cidr'):
+        create_component_rule(applicationName, component['ComponentName'], 'cidr', component['Cidr'], headers)
+    if component.get('Fqdn'):
+        create_component_rule(applicationName, component['ComponentName'], 'fqdn', component['Fqdn'], headers)
+    if component.get('Netbios'):
+        create_component_rule(applicationName, component['ComponentName'], 'netbios', component['Netbios'], headers)
+    if component.get('OsNames'):
+        create_component_rule(applicationName, component['ComponentName'], 'osNames', component['OsNames'], headers)
+    if component.get('Hostnames'):
+        create_component_rule(applicationName, component['ComponentName'], 'hostnames', component['Hostnames'], headers)
+    if component.get('ProviderAccountId'):
+        create_component_rule(applicationName, component['ComponentName'], 'providerAccountId', component['ProviderAccountId'], headers)
+    if component.get('ProviderAccountName'):
+        create_component_rule(applicationName, component['ComponentName'], 'providerAccountName', component['ProviderAccountName'], headers)
+    if component.get('ResourceGroup'):
+        create_component_rule(applicationName, component['ComponentName'], 'resourceGroup', component['ResourceGroup'], headers)
+    if component.get('AssetType'):
+        create_component_rule(applicationName, component['ComponentName'], 'assetType', component['AssetType'], headers)
+    
+
+    if component.get('MultiConditionRule'):
+        create_multicondition_component_rule(applicationName, component['ComponentName'], component.get('MultiConditionRule'), headers)
+
+    repository_names = component.get('RepositoryName', [])
+    if isinstance(repository_names, str):
+        repository_names = [repository_names]
+    for repo_name in repository_names:
+        create_component_rule(applicationName, component['ComponentName'], 'repository', [repo_name], headers)
 
             
 # Handle Repository Rule Creation for Components
-def create_component_rule(applicationName, componentName, repositoryName, searchRepository, headers):
-    rule = dict()
-    if searchRepository:
-        rule['name'] = f"Search rule for {searchRepository}"
-        rule['filter'] = {"keyLike": searchRepository}
-    else:
-        rule['name'] = f"Repository rule for {repositoryName}"
-        rule['filter'] = {"repository": [repositoryName]}
+def create_component_rule(applicationName, componentName, filterName, filterValue, headers):
+    rule = {
+        "name": f'Rule for {filterName}',
+        "filter": {filterName: filterValue}
+    }
 
     payload = {
         "selector": {
@@ -501,10 +511,10 @@ def create_component_rule(applicationName, componentName, repositoryName, search
         api_url = construct_api_url("/v1/components/rules")
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
-        print(f"Rule for {repositoryName if repositoryName else searchRepository } created.")
+        print(f"Rule for { filterValue } created.")
     except requests.exceptions.RequestException as e:
         if response.status_code == 409:
-            print(f" > Rule for {repositoryName if repositoryName else searchRepository} already exists.")
+            print(f" > Rule for {filterValue} already exists.")
         else:
             print(f"Error: {e}")
             print(f"Response content: {response.content}")
@@ -524,6 +534,27 @@ def create_multicondition_component_rule(applicationName, componentName, multico
         rule['filter']['tags'] = []
         for tag in multicondition.get('Tags'):
             rule['filter']['tags'].append({"value": tag})
+    if multicondition.get('Cidr'):
+        rule['filter']['cidr'] = multicondition.get('Cidr')
+    if multicondition.get('Fqdn'):
+        rule['filter']['fqdn'] = multicondition.get('Fqdn')
+    if multicondition.get('Netbios'):
+        rule['filter']['netbios'] = multicondition.get('Netbios')
+    if multicondition.get('OsNames'):
+        rule['filter']['osNames'] = multicondition.get('OsNames')
+    if multicondition.get('Hostnames'):
+        rule['filter']['hostnames'] = multicondition.get('Hostnames')
+    if multicondition.get('ProviderAccountId'):
+        rule['filter']['providerAccountId'] = multicondition.get('ProviderAccountId')
+    if multicondition.get('ProviderAccountName'):
+        rule['filter']['providerAccountName'] = multicondition.get('ProviderAccountName')
+    if multicondition.get('ResourceGroup'):
+        rule['filter']['resourceGroup'] = multicondition.get('ResourceGroup')
+    if multicondition.get('AssetType'):
+        rule['filter']['assetType'] = multicondition.get('AssetType')
+
+    if not rule['filter']:
+        return
 
     payload = {
         "selector": {
