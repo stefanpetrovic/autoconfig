@@ -88,6 +88,23 @@ The teams have component association rules based on the tag pteam `pteam` tag to
 
 Example `pteam:axelot`.
 
+In case there is an issue with team associations, new flag is introduced to recreate the associations.
+`RecreateTeamAssociations` is the team property, and when set to `True`, then the associations are recreated for that team.
+
+Example configuration:
+
+```
+TeamName: SP_axelot20
+AzureDevopsAreaPath: company\SP_axelot20
+TeamWikiLocation: 
+RecreateTeamAssociations: False
+TeamMembers:
+- Name: james terry
+  EmailAddress: James.terry@company.com
+  EmployeeType: Employee
+  Level: M6 
+```
+
 The function [CreateTeams] Phoenix.ps1
 
 ## Team Assignment
@@ -162,7 +179,165 @@ Example `pteam:axelot`.
 
 Mapping assets with components is done via:
 1. RepositoryName, SearchName, AssetType, Tags, Cidr, Fqdn, Netbios, OsNames, Hostnames, ProviderAccountId, ProviderAccountName, ResourceGroup - creates individual component for each property 
-3. MultiConditionRule - can combine repos, search, tags etc in one rule
+Example config with all possible options listed:
+
+~~~
+DeploymentGroups:
+  - AppName: TST_TestApp109 #name of the application
+    #Status: NotStarted #Status tags optionals (get added as tags)
+    TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
+      - SP_lima20
+      - SP_axelot20
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+    ReleaseDefinitions: []
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Components:
+      - ComponentName: product106-repo10 #name of the component 
+        Status: Production #Tag Optional
+        Type: Release #Tag Optional
+        TeamNames:  #names of the team as it appears in hives and teams
+          - SP_axelot20
+          - SP_lima20
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
+        SearchName: search_item
+        AssetType: REPOSITORY #Look up possible values in the documentation
+        Tags:
+          - "123"
+          - "1235"
+        Cidr: 10.1.1.0/24
+        Fqdn: 
+          - testfqdn
+        Netbios: 
+          - testbios
+        OsNames: 
+          - testosnames
+        Hostnames: 
+          - testhostnames
+        ProviderAccountId: 
+          - testaccountid
+        ProviderAccountName: 
+          - testaccountname
+        ResourceGroup: 
+          - testresourcegroup
+~~~
+
+2. MultiConditionRule - can combine repos, search, tags etc in one rule
+
+~~~
+
+DeploymentGroups:
+  - AppName: TST_TestApp109 #name of the application
+    #Status: NotStarted #Status tags optionals (get added as tags)
+    TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
+      - SP_lima20
+      - SP_axelot20
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+    ReleaseDefinitions: []
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Components:
+      - ComponentName: product106-repo10 #name of the component 
+        Status: Production #Tag Optional
+        Type: Release #Tag Optional
+        TeamNames:  #names of the team as it appears in hives and teams
+          - SP_axelot20
+          - SP_lima20
+        MultiConditionRule:
+          AssetType: REPOSITORY #Look up possible values in the documentation
+          RepositoryName: testrepo
+          SearchName: testsearch2
+          Tags:
+            - "123"
+            - "1235"
+          Cidr: 10.1.1.0/24
+          Fqdn: 
+            - testfqdn
+          Netbios: 
+            - testbios
+          OsNames: 
+            - testosnames
+          Hostnames: 
+            - testhostnames
+          ProviderAccountId: 
+            - testaccountid
+          ProviderAccountName: 
+            - testaccountname
+          ResourceGroup: 
+            - testresourcegroup
+
+~~~
+
+3. Combining single rule with multicondition rule is also supported
+
+~~~
+
+DeploymentGroups:
+  - AppName: TST_TestApp109 #name of the application
+    #Status: NotStarted #Status tags optionals (get added as tags)
+    TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
+      - SP_lima20
+      - SP_axelot20
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+    ReleaseDefinitions: []
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Components:
+      - ComponentName: product106-repo10 #name of the component 
+        Status: Production #Tag Optional
+        Type: Release #Tag Optional
+        TeamNames:  #names of the team as it appears in hives and teams
+          - SP_axelot20
+          - SP_lima20
+        RepositoryName: Phoenix-ent-demo/Damn-Vulnerable-Source-Code  #name of the repo as appears in phoenix ,can be more than one
+        SearchName: search_item
+        AssetType: REPOSITORY #Look up possible values in the documentation
+        Tags:
+          - "123"
+          - "1235"
+        Cidr: 10.1.1.0/24
+        Fqdn: 
+          - testfqdn
+        Netbios: 
+          - testbios
+        OsNames: 
+          - testosnames
+        Hostnames: 
+          - testhostnames
+        ProviderAccountId: 
+          - testaccountid
+        ProviderAccountName: 
+          - testaccountname
+        ResourceGroup: 
+          - testresourcegroup
+        MultiConditionRule:
+          AssetType: REPOSITORY #Look up possible values in the documentation
+          RepositoryName: testrepo
+          SearchName: testsearch2
+          Tags:
+            - "123"
+            - "1235"
+          Cidr: 10.1.1.0/24
+          Fqdn: 
+            - testfqdn
+          Netbios: 
+            - testbios
+          OsNames: 
+            - testosnames
+          Hostnames: 
+            - testhostnames
+          ProviderAccountId: 
+            - testaccountid
+          ProviderAccountName: 
+            - testaccountname
+          ResourceGroup: 
+            - testresourcegroup
+
+~~~
+
 
 The function for Component creation is [CreateRepositories](Phoenix.ps1).
 
