@@ -111,11 +111,13 @@ The function [CreateTeams] Phoenix.ps1
 
 Staff need to first login to the [Phoenix portal](https://YOURDOMAIN.securityphoenix.cloud/) using SSO before they can be assigned to a team.
 
-The assignment should be run once a day (at least) [Phoenix Cron job]
+The assignment should be run once a day (at least) 
 
 The [Teams Yaml] Teams files are used as a source of truth of who belongs to which team.
 
 The function [AssignUsersToTeam] Phoenix.ps1
+
+
 
 ## Hive Leaders
 
