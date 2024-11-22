@@ -795,6 +795,10 @@ def create_team_rules(teams, pteams, access_token):
         # Check if the team already exists in pteams
         for pteam in pteams:
             if pteam['name'] == team['TeamName']:
+                # override logic for creating team associations
+                if team.get('RecreateTeamAssociations'):
+                    print(f" > recreating pteam association for {team['TeamName']}")
+                    create_team_rule("pteam", team['TeamName'], pteam['id'], access_token)
                 found = True
                 break
         

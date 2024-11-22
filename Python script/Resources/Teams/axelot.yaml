@@ -1,13 +1,14 @@
 TeamName: SP_axelot20
 AzureDevopsAreaPath: company\SP_axelot20
 TeamWikiLocation: 
+RecreateTeamAssociations: False
 TeamMembers:
 - Name: james terry
-  EmailAddress: james.terry@company.com
+  EmailAddress: James.terry@company.com
   EmployeeType: Employee
   Level: M6 
 - Name: james blake
-  EmailAddress: dave.blake@company.com
+  EmailAddress: Dave.blake@company.com
   EmployeeType: Employee
   Level: L4 
 - Name: rich terry
@@ -15,7 +16,7 @@ TeamMembers:
   EmployeeType: UK Contractor
   Level: L5 
 - Name: joe doe
-  EmailAddress: joe.doe@company.com
+  EmailAddress: Joe.doe@company.com
   EmployeeType: Employee
   Level: L2 
 - Name: darren mcperson
