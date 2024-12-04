@@ -1250,7 +1250,7 @@ def does_member_exist(user_email, team, hive_staff, all_team_access):
     """
     return any(user_email.lower() == member['EmailAddress'].lower() for member in team['TeamMembers']) or \
            user_email.lower() in (lc_all_team_access.lower() for lc_all_team_access in all_team_access) or \
-           any(user_email.lower() == staff_member['Lead'].lower() or user_email.lower() in staff_member['Product'].lower() for staff_member in hive_staff)
+           any(user_email.lower() == staff_member['Lead'].lower() or user_email.lower() in staff_member['Product'] for staff_member in hive_staff)
 
 
 
