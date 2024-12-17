@@ -12,10 +12,12 @@ DeploymentGroups:
     ReleaseDefinitions: []
     Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
     Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Deployment_set: Service1
     Components:
       - ComponentName: product106-repo10 #name of the component 
         Status: Production #Tag Optional
         Type: Release #Tag Optional
+        Deployment_set: product106-repo10
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
           - SP_lima20
@@ -149,6 +151,7 @@ DeploymentGroups:
         Tier: 5 #importance from 1-10
         Domain: App123456
         SubDomain: Dev
+        
 Environment Groups:
   - Name: TST_Production
     Type: CLOUD
@@ -160,8 +163,9 @@ Environment Groups:
     Tag: 
     Team:
     Services:
-      - Service: ProdGRP105
+      - Service: Damn-Vulnerable-Source-Code_service
         Type: Cloud
+        SearchName: Damn-Vulnerable-Source-Code
         Association: Tag
         Association_value: issue-test-asset3
         Tier: 2 #importance from 1-10
