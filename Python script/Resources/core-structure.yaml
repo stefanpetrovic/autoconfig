@@ -3,6 +3,7 @@ AllAccessAccounts: # Not mandatory - list of all access account emails
  - ciso@company.com
 DeploymentGroups:
   - AppName: TST_TestApp109 #name of the application
+    AppID: 123444
     #Status: NotStarted #Status tags optionals (get added as tags)
     TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
       - SP_lima20
@@ -16,8 +17,10 @@ DeploymentGroups:
     Components:
       - ComponentName: product106-repo10 #name of the component 
         Status: Production #Tag Optional
+        AppID: 123444 #auto created
         Type: Release #Tag Optional
         Deployment_set: product106-repo10
+        # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
           - SP_lima20
@@ -169,6 +172,8 @@ Environment Groups:
         Association: Tag
         Association_value: issue-test-asset3
         Tier: 2 #importance from 1-10
+        Deployment_set: product106-repo10
+        # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamName: SP_lima20 #name of the team as it appears in hives and teams 
       - Service: ProdGRP2
         Type: Container
