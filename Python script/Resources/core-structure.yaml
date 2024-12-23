@@ -19,7 +19,7 @@ DeploymentGroups:
         Status: Production #Tag Optional
         AppID: 123444 #auto created
         Type: Release #Tag Optional
-        Deployment_set: product106-repo10
+        # Deployment_set: product106-repo10
         # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
