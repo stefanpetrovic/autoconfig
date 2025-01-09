@@ -487,6 +487,42 @@ Deployed applications is the association of Applications to the Service.
 
 This is based on the logic that Applications (subdomains) are the same as the Service(subdomain).
 
-Due to the infrequency of new services these are currently created manually via the Phoenix UI.
+This association is achieved via `Deployment_set` element in Application and Service.
+Example:
 
-Note: an updated version of this script will be released with the API to allocate the Tag deployment traceability with Applications
+```
+DeploymentGroups:
+  - AppName: TST_TestApp109 #name of the application
+    AppID: 123444
+    #Status: NotStarted #Status tags optionals (get added as tags)
+    TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
+      - SP_lima20
+      - SP_axelot20
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+    ReleaseDefinitions: []
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Deployment_set: Service1
+
+
+Environment Groups:
+  - Name: TST_Production
+    Type: CLOUD
+    Status: Production
+    Responsable: frankadm@admin.com
+    Tier: 2 #importance from 1-10
+    TeamName: SP_lima20 #name of the team as it appears in hives and teams 
+    Status: Production
+    Tag: 
+    Team:
+    Services:
+      - Service: Damn-Vulnerable-Source-Code_service
+        Type: Cloud
+        SearchName: Damn-Vulnerable-Source-Code
+        Tag: issue:issue-test-asset3
+        Tier: 2 #importance from 1-10
+        Deployment_set: Service1
+        # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
+        TeamName: SP_lima20 #name of the team as it appears in hives and teams 
+```

@@ -19,7 +19,6 @@ DeploymentGroups:
         Status: Production #Tag Optional
         AppID: 123444 #auto created
         Type: Release #Tag Optional
-        # Deployment_set: product106-repo10
         # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamNames:  #names of the team as it appears in hives and teams
           - SP_axelot20
@@ -171,7 +170,7 @@ Environment Groups:
         SearchName: Damn-Vulnerable-Source-Code
         Tag: issue:issue-test-asset3
         Tier: 2 #importance from 1-10
-        Deployment_set: product106-repo10
+        Deployment_set: Service1
         # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamName: SP_lima20 #name of the team as it appears in hives and teams 
       - Service: ProdGRP2

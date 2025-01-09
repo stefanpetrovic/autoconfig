@@ -1442,3 +1442,48 @@ def delete_team_member(email, team_id, headers):
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
 
+def create_deployments(applications, environments, headers):
+    application_services = []
+
+    for app in applications:
+        if not app.get('Deployment_set', None):
+            continue
+        deployment_set = app.get('Deployment_set')
+        for env in environments:
+            if not env.get('Services'):
+                continue
+            for service in env.get('Services'):
+                if not service.get('Deployment_set'):
+                    continue
+                if service.get('Deployment_set') == deployment_set:
+                    application_services.append({
+                        "applicationSelector": {
+                            #"id": app.get("id"),
+                            "name": app.get("AppName"),
+                            #"caseSensitive": true
+                        },
+                        "serviceSelector": {
+                            #"id": service.get("id"),
+                            "name": service.get("Service"),
+                            #"tags": [
+                            #    {
+                            #        "value": deployment_set
+                            #    }
+                            #]
+                        }
+                    })
+    
+    print(f'Number of deployments to add {len(application_services)}')
+
+    for deployment in application_services:
+        try:
+            api_url = construct_api_url(f"/v1/applications/deploy")
+            response = requests.patch(api_url, headers=headers, json=deployment)
+            response.raise_for_status()
+            print(f" + Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']}")
+        except requests.exceptions.RequestException as e:
+            if response.status_code == 409:
+                print(f" - Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']} already exists.")
+            else:
+                print(f"Error: {e}")
+                exit(1)
