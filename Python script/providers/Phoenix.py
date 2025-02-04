@@ -795,6 +795,35 @@ def create_teams(teams, pteams, access_token):
     return new_pteams
 
 
+def create_teams_from_pteams(applications, environments, pteams, access_token):
+    existing_teams = set([pteam['name'] for pteam in pteams ])
+    teams_to_add = set()
+    for env in environments:
+        if 'TeamName' in env and env['TeamName'] not in existing_teams:
+            teams_to_add.add(env['TeamName'])
+        for service in env['Services']:
+            if 'TeamName' in service and service['TeamName'] not in existing_teams:
+                teams_to_add.add(service['TeamName'])
+    
+    for app in applications:
+        if 'TeamNames' in app:
+            for team in app['TeamNames']:
+                if team not in existing_teams:
+                    teams_to_add.add(team)
+        for comp in app['Components']:
+            if 'TeamNames' in comp:
+                for team in comp['TeamNames']:
+                    if team not in existing_teams:
+                        teams_to_add.add(team)
+
+    print(f'Detected teams to add {teams_to_add}')
+
+    teams_to_add = [{'TeamName': team} for team in teams_to_add]
+    for team in teams_to_add:
+        create_teams(teams_to_add, pteams, access_token)
+        create_team_rules(teams_to_add, pteams, access_token)
+
+
 def populate_phoenix_teams(access_token):
     """
     This function retrieves the list of Phoenix teams by making a GET request to the /v1/teams endpoint.
