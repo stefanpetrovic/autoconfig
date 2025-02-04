@@ -2,9 +2,12 @@ import base64
 import requests
 import json
 import time
+import Levenshtein
 from multipledispatch import dispatch
 from providers.Utils import group_repos_by_subdomain, calculate_criticality
 
+
+SIMILARITY_THRESHOLD = 0.9 # Levenshtein ratio for comparing app name with service name. (1 means being equal)
 APIdomain = "https://api.YOURDOMAIN.securityphoenix.cloud" #change this with your specific domain
 DEBUG = False #debug settings to trigger debug output 
 
@@ -1476,6 +1479,53 @@ def create_deployments(applications, environments, headers):
     print(f'Number of deployments to add {len(application_services)}')
 
     for deployment in application_services:
+        try:
+            api_url = construct_api_url(f"/v1/applications/deploy")
+            response = requests.patch(api_url, headers=headers, json=deployment)
+            response.raise_for_status()
+            print(f" + Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']}")
+        except requests.exceptions.RequestException as e:
+            if response.status_code == 409:
+                print(f" - Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']} already exists.")
+            else:
+                print(f"Error: {e}")
+                exit(1)
+
+def check_app_name_matches_service_name(app_name, service_name):
+    if app_name.lower() == service_name.lower():
+        return True
+    similarity_ratio = Levenshtein.ratio(app_name, service_name)
+    if similarity_ratio > SIMILARITY_THRESHOLD:
+        print(f'Similarity ratio {similarity_ratio} between {app_name} and {service_name} is within threshold, adding deployment')
+        return True
+    else:
+        if DEBUG:
+            print(f'Similarity ratio {similarity_ratio} between {app_name} and {service_name} is NOT within threshold, NOT adding deployment')
+
+    return False
+
+def create_autolink_deployments(applications, environments, headers):
+    deployments = []
+
+    for app in applications:
+        app_name = app.get("AppName")
+        for env in environments:
+            if not env.get('Services'):
+                continue
+            for service in env.get('Services'):
+                service_name = service.get("Service")
+                if check_app_name_matches_service_name(app_name, service_name):
+                    deployments.append({
+                        "applicationSelector": {
+                            "name": app_name,
+                        },
+                        "serviceSelector": {
+                            "name": service_name
+                        }
+                    })
+    print(f'Number of deployments to add {len(deployments)}')
+
+    for deployment in deployments:
         try:
             api_url = construct_api_url(f"/v1/applications/deploy")
             response = requests.patch(api_url, headers=headers, json=deployment)

@@ -2,7 +2,7 @@
 AllAccessAccounts: # Not mandatory - list of all access account emails
  - ciso@company.com
 DeploymentGroups:
-  - AppName: TST_TestApp109 #name of the application
+  - AppName: TST_TestApp10910 #name of the application
     AppID: 123444
     #Status: NotStarted #Status tags optionals (get added as tags)
     TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
@@ -178,7 +178,7 @@ Environment Groups:
         Tag: asset.type:workload
         Tier: 2 #importance from 1-10
         TeamName: SP_lima20 #name of the team as it appears in hives and teams  
-      - Service: stefan_service9
+      - Service: TST_TestApp1091
         Type: Infra
         Tier: 8
         TeamName: SP_lima20
