@@ -526,3 +526,16 @@ Environment Groups:
         # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamName: SP_lima20 #name of the team as it appears in hives and teams 
 ```
+
+
+## Auto-linking deployment sets
+
+This action compares application names with service names, and if they are the same, or similar, deployment set is created.
+
+
+
+## Auto create teams from pteams
+
+This action goes through all environments, services, applications and components, checks which teams are mentioned and 
+automatically creates them if they are missing.
+It will also create auto-link rules based on pteam tag.
