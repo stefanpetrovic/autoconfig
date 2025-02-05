@@ -1485,9 +1485,7 @@ def create_deployments(applications, environments, headers):
             if not env.get('Services'):
                 continue
             for service in env.get('Services'):
-                if not service.get('Deployment_set'):
-                    continue
-                if service.get('Deployment_set') == deployment_set:
+                if service.get('Deployment_set') and service.get('Deployment_set') == deployment_set:
                     application_services.append({
                         "applicationSelector": {
                             #"id": app.get("id"),
@@ -1504,21 +1502,41 @@ def create_deployments(applications, environments, headers):
                             #]
                         }
                     })
+                if service.get('Deployment_tag') and service.get('Deployment_tag') == deployment_set:
+                    application_services.append({
+                        "applicationSelector": {
+                            "name": app.get("AppName"),
+                        },
+                        "serviceSelector": {
+                            "tags": [
+                                {
+                                    "value": service.get('Deployment_tag')
+                                }
+                            ]
+                        }
+                    })
     
     print(f'Number of deployments to add {len(application_services)}')
+    print(f'Deployments {application_services}')
 
     for deployment in application_services:
+        app_name = deployment['applicationSelector']['name']
+        use_service_name = 'name' in deployment['serviceSelector']
         try:
             api_url = construct_api_url(f"/v1/applications/deploy")
             response = requests.patch(api_url, headers=headers, json=deployment)
             response.raise_for_status()
-            print(f" + Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']}")
+            print(f" + Deployment for application {app_name} and \
+                   { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
+                    else 'Service deployment tag: ' + deployment['serviceSelector']['tags']}")
         except requests.exceptions.RequestException as e:
             if response.status_code == 409:
-                print(f" - Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']} already exists.")
+                print(f" + Deployment for application {app_name} and \
+                   { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
+                    else 'Service deployment tag: ' + deployment['serviceSelector']['tags']} already exists.")
             else:
                 print(f"Error: {e}")
-                exit(1)
+                print(response.text)
 
 def check_app_name_matches_service_name(app_name, service_name):
     if app_name.lower() == service_name.lower():
