@@ -531,7 +531,9 @@ Environment Groups:
 ## Auto-linking deployment sets
 
 This action compares application names with service names, and if they are the same, or similar, deployment set is created.
-
+Similarity is computed with Levenshtein ratio, equal names have ratio of 1.
+Similarity is configurable through SIMILARITY_THRESHOLD in Phoenix.py script.
+Deployment sets are created for Levenshtein ratio greater than SIMILARITY_THRESHOLD.
 
 
 ## Auto create teams from pteams
