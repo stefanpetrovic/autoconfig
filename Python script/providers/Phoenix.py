@@ -1589,40 +1589,75 @@ def create_autolink_deployments(applications, environments, headers):
                 print(f"Error: {e}")
                 exit(1)
 
-def get_assets(applicationEnvironmentId, headers):
+def get_assets(applicationEnvironmentId, type, already_suggested_components, headers):
     asset_request = {
         "requests": [
             {
-                "type": "CLOUD",
+                "type": type,
                 "applicationEnvironmentId": applicationEnvironmentId
             }
         ]
     }
     try:
-        print(f"Fetching assets for {applicationEnvironmentId}")
+        print(f"Fetching assets for {applicationEnvironmentId} and {type}")
         api_url = construct_api_url(f"/v1/assets?pageNumber=0&pageSize=100")
         response = requests.post(api_url, headers=headers, json = asset_request)
         response.raise_for_status()
 
         data = response.json()
-        assets = data.get('content', [])
+        assets = [asset['name'] for asset in data.get('content', [])]
         total_pages = data.get('totalPages', 1)
-        print(total_pages)
+        #print(total_pages)
         for i in range(1, total_pages):
-            print(f"Fetching page {i}")
+            #print(f"Fetching page {i}")
             api_url = construct_api_url(f"/v1/assets?pageNumber={i}&pageSize=100")
             response = requests.post(api_url, headers=headers, json = asset_request)
-            new_assets = response.json().get('content', [])
-            print(f"New assets {len(new_assets)}")
+            new_assets = [asset['name'] for asset in response.json().get('content', [])]
+            #print(f"New assets {len(new_assets)}")
             assets += new_assets
 
-        print(f"Total assets {len(assets)}")
+        asset_groups = []
+        for asset in assets:
+            added_to_group = False
+            for group in asset_groups:
+                should_add_to_group = True
+                for groupped_asset in group:
+                    if Levenshtein.ratio(asset, groupped_asset) < 0.9:
+                        should_add_to_group = False
+                        break
+                if should_add_to_group:
+                    group.append(asset)
+                    added_to_group = True
+                    break
+            if not added_to_group:
+                asset_groups.append([asset,])
+                continue
+        #print(f'Number of groups {len(asset_groups)}')
+        for group in asset_groups:
+            if len(group) > 5 and not group[0] in already_suggested_components:
+                answer = input(f'Would you like to create component {group[0]}? [Y for yes] [N for no] [A for alter name]')
+                already_suggested_components.add(group[0])
+                component_name = group[0]
+                if answer == 'N':
+                    continue
+                if answer == 'A':
+                    component_name = input("Component name:")
+                    already_suggested_components.add(component_name)
+                print(f'Creating component with name {component_name}')
+        
+        with open('groups.json', 'a') as f:
+            json.dump(asset_groups, f)
+
+        return already_suggested_components  
+
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
         exit(1)
 
 def create_components_from_assets(applicationEnvironments, headers):
-    for appEnv in applicationEnvironments:
-        print(appEnv)
-        get_assets(appEnv.get("id"), headers)
-        break
+    types = ["CONTAINER", "CLOUD"]
+    for type in types:
+        already_suggested_components = set()
+        for appEnv in applicationEnvironments:
+            if appEnv.get('type') == "ENVIRONMENT":
+                already_suggested_components.update(get_assets(appEnv.get("id"), type, already_suggested_components, headers))
