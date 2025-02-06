@@ -1588,3 +1588,41 @@ def create_autolink_deployments(applications, environments, headers):
             else:
                 print(f"Error: {e}")
                 exit(1)
+
+def get_assets(applicationEnvironmentId, headers):
+    asset_request = {
+        "requests": [
+            {
+                "type": "CLOUD",
+                "applicationEnvironmentId": applicationEnvironmentId
+            }
+        ]
+    }
+    try:
+        print(f"Fetching assets for {applicationEnvironmentId}")
+        api_url = construct_api_url(f"/v1/assets?pageNumber=0&pageSize=100")
+        response = requests.post(api_url, headers=headers, json = asset_request)
+        response.raise_for_status()
+
+        data = response.json()
+        assets = data.get('content', [])
+        total_pages = data.get('totalPages', 1)
+        print(total_pages)
+        for i in range(1, total_pages):
+            print(f"Fetching page {i}")
+            api_url = construct_api_url(f"/v1/assets?pageNumber={i}&pageSize=100")
+            response = requests.post(api_url, headers=headers, json = asset_request)
+            new_assets = response.json().get('content', [])
+            print(f"New assets {len(new_assets)}")
+            assets += new_assets
+
+        print(f"Total assets {len(assets)}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        exit(1)
+
+def create_components_from_assets(applicationEnvironments, headers):
+    for appEnv in applicationEnvironments:
+        print(appEnv)
+        get_assets(appEnv.get("id"), headers)
+        break
