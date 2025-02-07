@@ -1474,7 +1474,7 @@ def delete_team_member(email, team_id, headers):
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
 
-def create_deployments(applications, environments, headers):
+def create_deployments(applications, environments, phoenix_apps_envs, headers):
     application_services = []
 
     for app in applications:
@@ -1517,23 +1517,27 @@ def create_deployments(applications, environments, headers):
                     })
     
     print(f'Number of deployments to add {len(application_services)}')
-    print(f'Deployments {application_services}')
 
     for deployment in application_services:
         app_name = deployment['applicationSelector']['name']
+        app_id = next((x.get('id') for x in phoenix_apps_envs if x.get('type') == "APPLICATION" and x.get("name").lower() == app_name.lower()), None)
+        if not app_id:
+            print(f'App not found for name {app_name}')
+            continue
         use_service_name = 'name' in deployment['serviceSelector']
         try:
-            api_url = construct_api_url(f"/v1/applications/deploy")
+            deployment = {"serviceSelector": deployment["serviceSelector"]}
+            api_url = construct_api_url(f"/v1/applications/{app_id}/deploy")
             response = requests.patch(api_url, headers=headers, json=deployment)
             response.raise_for_status()
             print(f" + Deployment for application {app_name} and \
                    { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
-                    else 'Service deployment tag: ' + deployment['serviceSelector']['tags']}")
+                    else 'Service deployment tag: ' + str(deployment['serviceSelector']['tags'][0])}")
         except requests.exceptions.RequestException as e:
             if response.status_code == 409:
                 print(f" + Deployment for application {app_name} and \
                    { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
-                    else 'Service deployment tag: ' + deployment['serviceSelector']['tags']} already exists.")
+                    else 'Service deployment tag: ' + str(deployment['serviceSelector']['tags'])} already exists.")
             else:
                 print(f"Error: {e}")
                 print(response.text)

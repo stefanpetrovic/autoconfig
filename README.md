@@ -1,7 +1,7 @@
 ## Versioning
 
-V 4.0
-Date - 5 Feb 2025
+V 4.1
+Date - 7 Feb 2025
 
 # Introduction
 
