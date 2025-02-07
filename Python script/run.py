@@ -147,7 +147,7 @@ if action_code:
 
 if action_deployment:
     print("Performing deployment action")
-    create_deployments(applications, environments, headers)
+    create_deployments(applications, environments, app_environments, headers)
     print(f"[Diagnostic] [Deployment] Time Taken: {time.time() - start_time}")
     start_time = time.time()
 

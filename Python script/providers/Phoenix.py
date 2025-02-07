@@ -1474,7 +1474,7 @@ def delete_team_member(email, team_id, headers):
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
 
-def create_deployments(applications, environments, headers):
+def create_deployments(applications, environments, phoenix_apps_envs, headers):
     application_services = []
 
     for app in applications:
@@ -1485,9 +1485,7 @@ def create_deployments(applications, environments, headers):
             if not env.get('Services'):
                 continue
             for service in env.get('Services'):
-                if not service.get('Deployment_set'):
-                    continue
-                if service.get('Deployment_set') == deployment_set:
+                if service.get('Deployment_set') and service.get('Deployment_set') == deployment_set:
                     application_services.append({
                         "applicationSelector": {
                             #"id": app.get("id"),
@@ -1504,21 +1502,45 @@ def create_deployments(applications, environments, headers):
                             #]
                         }
                     })
+                if service.get('Deployment_tag') and service.get('Deployment_tag') == deployment_set:
+                    application_services.append({
+                        "applicationSelector": {
+                            "name": app.get("AppName"),
+                        },
+                        "serviceSelector": {
+                            "tags": [
+                                {
+                                    "value": service.get('Deployment_tag')
+                                }
+                            ]
+                        }
+                    })
     
     print(f'Number of deployments to add {len(application_services)}')
 
     for deployment in application_services:
+        app_name = deployment['applicationSelector']['name']
+        app_id = next((x.get('id') for x in phoenix_apps_envs if x.get('type') == "APPLICATION" and x.get("name").lower() == app_name.lower()), None)
+        if not app_id:
+            print(f'App not found for name {app_name}')
+            continue
+        use_service_name = 'name' in deployment['serviceSelector']
         try:
-            api_url = construct_api_url(f"/v1/applications/deploy")
+            deployment = {"serviceSelector": deployment["serviceSelector"]}
+            api_url = construct_api_url(f"/v1/applications/{app_id}/deploy")
             response = requests.patch(api_url, headers=headers, json=deployment)
             response.raise_for_status()
-            print(f" + Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']}")
+            print(f" + Deployment for application {app_name} and \
+                   { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
+                    else 'Service deployment tag: ' + str(deployment['serviceSelector']['tags'][0])}")
         except requests.exceptions.RequestException as e:
             if response.status_code == 409:
-                print(f" - Deployment for application {deployment['applicationSelector']['name']} to {deployment['serviceSelector']['name']} already exists.")
+                print(f" + Deployment for application {app_name} and \
+                   { 'service name: ' + deployment['serviceSelector']['name'] if use_service_name \
+                    else 'Service deployment tag: ' + str(deployment['serviceSelector']['tags'])} already exists.")
             else:
                 print(f"Error: {e}")
-                exit(1)
+                print(response.text)
 
 def check_app_name_matches_service_name(app_name, service_name):
     if app_name.lower() == service_name.lower():

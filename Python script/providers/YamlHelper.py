@@ -101,6 +101,7 @@ def populate_environments_from_env_groups(resource_folder):
                     'Tier': service.get('Tier', 5),  # Default tier to 5 if not specified
                     'TeamName': service.get('TeamName', item['TeamName']),  # Default to environment's TeamName if missing
                     'Deployment_set': service.get('Deployment_set', None),
+                    'Deployment_tag': service.get('Deployment_tag', None),
                     'MultiConditionRule': load_multi_condition_rule(service),
                     'RepositoryName': repository_names,  # Properly handle missing 'RepositoryName'
                     'SearchName': service.get('SearchName', None),

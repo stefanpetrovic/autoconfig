@@ -1,7 +1,7 @@
 ## Versioning
 
-V 4.0
-Date - 5 Feb 2025
+V 4.1
+Date - 7 Feb 2025
 
 # Introduction
 
@@ -527,6 +527,44 @@ Environment Groups:
         TeamName: SP_lima20 #name of the team as it appears in hives and teams 
 ```
 
+Other way to create deployment is by using `Deployment_tag` on `Service` level. 
+This approach matches values of application `Deployment_set` with service `Deployment_tag` and links them using the 
+serviceSelector tags.
+
+Example configuration:
+
+```
+DeploymentGroups:
+  - AppName: TST_TestApp10910 #name of the application
+    AppID: 123444
+    #Status: NotStarted #Status tags optionals (get added as tags)
+    TeamNames: #names of the team responsble, can be a team responsible for the whole app or a specific component , this creates pteam tags
+      - SP_lima20
+      - SP_axelot20
+    Domain: Security  #domain = component or application can be used to group by bysiness unit
+    SubDomain: Simplified Access Management  #sub-domain = component or application can be used to group by busienss unit
+    ReleaseDefinitions: []
+    Responsable: frankadm@admin.com #owner of the application mandatory, needs to be one of the user already created in the phoenix security
+    Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
+    Deployment_set: Service1
+
+Environment Groups:
+  - Name: TST_Infra
+    Type: INFRA
+    Tier: 2 #importance from 1-10
+    Responsable: admin@admin.com
+    TeamName: SP_axelot20 #name of the team as it appears in hives and teams 
+    Status: Production
+    Tag: infra
+    Services:
+    - Service: InfraGRP1
+      Type: Infra
+      Cidr: 10.1.1.0/24 #can be a /xx cidr
+      Tier: 2 #importance from 1-10
+      TeamName: SP_axelot20 #name of the team as it appears in hives and teams
+      Tag: asset:Service1 
+      Deployment_tag: Service1
+```
 
 ## Auto-linking deployment sets
 

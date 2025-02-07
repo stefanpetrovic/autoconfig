@@ -15,7 +15,7 @@ DeploymentGroups:
     Tier: 4 #importance from 1-10 higher -> more critical , 5 default = neutral
     Deployment_set: Service1
     Components:
-      - ComponentName: product106-repo10 #name of the component 
+      - ComponentName: product106-repo101 #name of the component 
         Status: Production #Tag Optional
         AppID: 123444 #auto created
         Type: Release #Tag Optional
@@ -29,6 +29,7 @@ DeploymentGroups:
         Tags:
           - "123"
           - "1235"
+          - "Service1"
         Cidr: 10.1.1.0/24
         Fqdn: 
           - testfqdn
@@ -170,14 +171,15 @@ Environment Groups:
         SearchName: Damn-Vulnerable-Source-Code
         Tag: issue:issue-test-asset3
         Tier: 2 #importance from 1-10
-        Deployment_set: Service1
+        #Deployment_set: Service1
         # Deployment_tag: tag_123 #alternative tag to match the assets that are associated with this id 
         TeamName: SP_lima20 #name of the team as it appears in hives and teams 
       - Service: ProdGRP2
         Type: Container
-        Tag: asset.type:workload
+        Tag: asset:Service1
         Tier: 2 #importance from 1-10
         TeamName: SP_lima20 #name of the team as it appears in hives and teams  
+        #Deployment_tag: Service1
       - Service: TST_TestApp1091
         Type: Infra
         Tier: 8
@@ -248,7 +250,9 @@ Environment Groups:
       Type: Infra
       Cidr: 10.1.1.0/24 #can be a /xx cidr
       Tier: 2 #importance from 1-10
-      TeamName: SP_axelot20 #name of the team as it appears in hives and teams 
+      TeamName: SP_axelot20 #name of the team as it appears in hives and teams
+      Tag: asset:Service1 
+      Deployment_tag: Service1
     - Service: External Services
       Type: Infra
       Cidr: 109.113.0.0/16
