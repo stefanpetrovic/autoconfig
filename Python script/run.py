@@ -169,7 +169,7 @@ if action_autocreate_teams_from_pteam:
 
 if action_create_components_from_assets:
     print("Performing create components/services from assets")
-    create_components_from_assets(app_environments, headers)
+    create_components_from_assets(app_environments, phoenix_components, headers)
     print(f"[Diagnostic] [Create components/services from assets] Time Taken: {time.time() - start_time}")
 
 
